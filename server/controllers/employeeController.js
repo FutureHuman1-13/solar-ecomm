@@ -112,16 +112,17 @@ const updateEmployeeRoleStatus = async(req,res)=>{
             const {ids} = req.params;
             const [employeeId,roleId] = ids.split('-');
             const employee = await prisma.Employee.findFirst({
-                where:{id:employeeId}
+                where:{id:parseInt(employeeId)}
             })
             if(!employee) return res.status(404).json({message:"Employee Not Found!"})
             const updateRole = await prisma.Employee.update({
                 where:{
-                    id:employeeId
+                    id:parseInt(employeeId)
                 },
                 data:{
-                    roles:{connsect:{id:roleId}}
-                }
+                    roles:{connect:{id:parseInt(roleId)}}
+                },
+                include:{roles:true}
             })
             res.status(200).json(updateRole);
     }catch(err){

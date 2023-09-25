@@ -8,7 +8,7 @@ const categoriesController = require("../controllers/categoriesController");
 router.get("/:ids",categoriesController.getCategoriesById)
 router.get("/",categoriesController.getAllCategories)
 router.get("/seller/:id",categoriesController.getAllCategoriesBySeller)
-router.post("/:id",categoriesController.createNewCategories)
+router.post("/create/:id",categoriesController.createNewCategories)
 router.put("/:ids",categoriesController.updateCategories)
 router.delete("/:ids",categoriesController.deleteAllCategories)
 router.delete("/:id",categoriesController.deleteCategoriesById)

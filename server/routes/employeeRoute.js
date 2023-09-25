@@ -9,7 +9,7 @@ router.get("/employee/:id",employeeController.getEmployeeById)
 router.get("/employees",employeeController.getAllEmployees)
 router.post("/register/:id",employeeController.registerEmployee)
 router.put("/update/:id",employeeController.updateEmployee)
-router.put("/update-role/:id",employeeController.updateEmployeeRoleStatus)
+router.put("/update-role/:ids",employeeController.updateEmployeeRoleStatus)
 router.delete("/delete/:id",employeeController.deleteEmployeeById)
 router.delete("/delete",employeeController.deleteAllEmployee)
 

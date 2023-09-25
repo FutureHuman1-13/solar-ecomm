@@ -10,7 +10,7 @@ router.get("/", productController.getAllProducts)
 router.get("/:ids", productController.getProductById)
 router.get("/", productController.getAllProductsSeller)
 router.get("/:ids", productController.getProductBySeller)
-router.post("/:ids",
+router.post("/create/:ids",
     fileupload.upload.any(),
     fileupload.uploadImagesToFirebase,
     productController.createNewProduct)
