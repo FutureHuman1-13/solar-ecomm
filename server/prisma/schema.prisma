@@ -1,0 +1,225 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id               Int            @id @default(autoincrement())
+  fullName         String
+  gender           String
+  dob              DateTime       @db.Date
+  phone            Decimal        @unique
+  email            String         @unique
+  password         String
+  refreshToken     String?
+  resetToken       String?        @unique
+  roles            Role[]         @relation("employeeRole")
+  resetTokenExpiry DateTime?      @default(now())
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  addresses        Addresses[]
+  profileImage     ProfileImage[]
+}
+
+model Seller {
+  id               Int            @id @default(autoincrement())
+  fullName         String
+  gender           String
+  dob              DateTime       @db.Date
+  phone            Decimal        @unique
+  email            String         @unique
+  password         String
+  refreshToken     String?
+  resetToken       String?        @unique
+  resetTokenExpiry DateTime?      @default(now())
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  roles            Role[]         @relation("sellerRole")
+  product          Product[]
+  categories       Categories[]
+  order            Order[]
+  addresses        Addresses[]
+  profileImage     ProfileImage[]
+}
+
+model Role {
+  id             Int              @id @default(autoincrement())
+  name           String
+  isActiveRole   Boolean          @default(true)
+  permissions    Permission[]     @relation("rolePermission")
+  // employee       Employee[]       @relation("employeeRoles")
+  rolePermission RolePermission[]
+  employee       Employee[]       @relation("employeeRole")
+  customer       Customer[]       @relation("customerRole")
+  seller         Seller[]         @relation("sellerRole")
+}
+
+model Permission {
+  id                 Int              @id @default(autoincrement())
+  name               String
+  isActivePermission Boolean          @default(true)
+  roles              Role[]           @relation("rolePermission")
+  rolePermission     RolePermission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+model Customer {
+  id               Int           @id @default(autoincrement())
+  fullName         String
+  gender           String
+  dob              DateTime      @db.Date
+  phone            Decimal       @unique
+  email            String        @unique
+  password         String
+  address          String
+  houseNo          String?
+  street           String?
+  landmark         String?
+  pincode          Int?
+  city             String?
+  state            String?
+  refreshToken     String?
+  resetToken       String?       @unique
+  resetTokenExpiry DateTime?     @default(now())
+  isActive         Boolean       @default(true)
+  order            Order[]
+  addresses        Addresses[]
+  cart             Cart[]
+  profileImage     ProfileImage? @relation("CustomerProfileImage")
+  roles            Role[]        @relation("customerRole")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Categories {
+  id        Int       @id @default(autoincrement())
+  catName   String
+  isActive  Boolean   @default(true)
+  product   Product[]
+  createdAt DateTime  @default(now())
+  seller    Seller    @relation(fields: [sellerId], references: [id])
+  sellerId  Int
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id              Int            @id @default(autoincrement())
+  productTitle    String         @unique
+  description     String
+  price           Int
+  picture         String[]
+  rating          Float
+  quantity        Int            @default(0)
+  // bannerImage     String?
+  // isbannerImage   Boolean        @default(false)
+  isActiveAdmin   Boolean        @default(false)
+  featuredProduct Boolean        @default(false)
+  isActiveSeller  Boolean        @default(true)
+  isActiveProduct Boolean        @default(true)
+  categories      Categories     @relation(fields: [categoriesId], references: [id])
+  seller          Seller         @relation(fields: [sellerId], references: [id])
+  sellerId        Int
+  categoriesId    Int
+  cart            Cart[]
+  order           Order[]
+  productimage    ProductImage[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model Cart {
+  id         Int      @id @default(autoincrement())
+  quantity   Int      @default(0)
+  customerId Int
+  productId  Int
+  customer   Customer @relation(fields: [customerId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+  addedAt    DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Order {
+  id            Int       @id @default(autoincrement())
+  status        String    @default("Order Placed")
+  quantity      Int       @default(0)
+  size          String?   @default("")
+  paymentStatus String    @default("pending")
+  customerId    Int
+  productId     Int
+  product       Product   @relation(fields: [productId], references: [id])
+  customer      Customer  @relation(fields: [customerId], references: [id])
+  address       Addresses @relation(fields: [addressId], references: [id])
+  addressId     Int
+  seller        Seller    @relation(fields: [sellerId], references: [id])
+  sellerId      Int
+  orderOn       DateTime  @default(now())
+  updatedOn     DateTime  @updatedAt
+}
+
+model ProfileImage {
+  id         Int       @id @default(autoincrement())
+  fileName   String
+  url        String
+  uploadedAt DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  Customer   Customer? @relation("CustomerProfileImage", fields: [customerId], references: [id], onDelete: Cascade)
+  customerId Int?      @unique
+  seller     Seller?   @relation(fields: [sellerId], references: [id])
+  sellerId   Int?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  employeeId Int?
+}
+
+model ProductImage {
+  id         Int      @id @default(autoincrement())
+  fileName   String
+  url        String
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  uploadedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Addresses {
+  id         Int          @id @default(autoincrement())
+  fullName   String
+  phone      Decimal
+  type       AddressType?
+  houseNo    String?
+  street     String?
+  landmark   String?
+  address    String?
+  pincode    Int
+  city       String
+  state      String
+  myorder    Order[]
+  customer   Customer?    @relation(fields: [customerId], references: [id])
+  customerId Int?
+  seller     Seller?      @relation(fields: [sellerId], references: [id])
+  sellerId   Int?
+  employee   Employee?    @relation(fields: [employeeId], references: [id])
+  employeeId Int?
+}
+
+enum AddressType {
+  Billing
+  Shipping
+  Seller
+}
