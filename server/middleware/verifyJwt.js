@@ -13,9 +13,9 @@ const verifyJwt = async (req, res, next) => {
             process.env.ACCESS_TOKEN,
             async(err, decoded) => {
                 if (err) return res.sendStatus(403)//forbidden-invalid token
-                req.id    = decoded.userInfo.id
-                req.email = decoded.userInfo.email;
-                req.roles = decoded.userInfo.roles;
+                req.id    = decoded.id
+                req.email = decoded.email;
+                req.roles = decoded.roles;
                 // Assuming user has a 'roles' property in the JWT payload
                 // req.user = await prisma.User.findUnique({
                 //     where: { id: user.id },

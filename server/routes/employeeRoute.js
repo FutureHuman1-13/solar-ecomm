@@ -10,7 +10,8 @@ router.get("/employees",employeeController.getAllEmployees)
 router.post("/register/:id",employeeController.registerEmployee)
 router.put("/update/:id",employeeController.updateEmployee)
 router.put("/update-role/:ids",employeeController.updateEmployeeRoleStatus)
+router.put("/activeInactive/:id",employeeController.activeInactiveEmployee)
 router.delete("/delete/:id",employeeController.deleteEmployeeById)
-router.delete("/delete",employeeController.deleteAllEmployee)
+// router.delete("/delete",employeeController.deleteAllEmployee)
 
 module.exports = router;

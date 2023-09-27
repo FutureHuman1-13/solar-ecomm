@@ -53,7 +53,7 @@ model Seller {
 
 model Role {
   id             Int              @id @default(autoincrement())
-  name           String
+  name           String           @unique
   isActiveRole   Boolean          @default(true)
   permissions    Permission[]     @relation("rolePermission")
   // employee       Employee[]       @relation("employeeRoles")
@@ -65,7 +65,7 @@ model Role {
 
 model Permission {
   id                 Int              @id @default(autoincrement())
-  name               String
+  name               String           @unique
   isActivePermission Boolean          @default(true)
   roles              Role[]           @relation("rolePermission")
   rolePermission     RolePermission[]
@@ -139,7 +139,7 @@ model Product {
   categoriesId    Int
   cart            Cart[]
   order           Order[]
-  productimage    ProductImage[]
+  productImage    ProductImage[]  @relation("productImage")
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 }
@@ -192,7 +192,7 @@ model ProductImage {
   fileName   String
   url        String
   productId  Int
-  product    Product  @relation(fields: [productId], references: [id])
+  product    Product  @relation("productImage",fields: [productId], references: [id],onDelete: Cascade)
   uploadedAt DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -205,7 +205,7 @@ model Addresses {
   houseNo    String?
   street     String?
   landmark   String?
-  address1   String?
+  fullAddress   String?
   pincode    Int
   city       String
   state      String

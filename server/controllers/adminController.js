@@ -71,6 +71,24 @@ const updatePermission = async (req, res) => {
     }
 }
 
+const updateRole = async(req,res)=>{
+    try {
+        const roleId = parseInt(req.parmas.id);
+        const { name } = req.body;
+        const updatedRole = await prisma.Role.update({
+            where: { id: roleId },
+            data: {
+                name,
+            }
+        })
+        res.status(201).json(updatedRole)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            err:"Error Updating Role!"        })
+    }
+}
+
 const listRoles = async (req, res) => {
     try {
         const roles = await prisma.Role.findMany();
@@ -118,5 +136,5 @@ const assignPermissionToRole = async (req, res) => {
 }
 
 module.exports = {
-    createRole, createPermission, assignPermissionToRole, listRoles, listPermissions, updatePermission,
+    createRole, createPermission, assignPermissionToRole, listRoles, listPermissions, updatePermission,updateRole,
 };

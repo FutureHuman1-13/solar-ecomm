@@ -3,41 +3,37 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../db/prisma');
 require('dotenv').config();
 
-const userLogin = async (req, res) => {
+const employeeLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ message: "All fields are mendatory!" })//not found
-        const userLogin = await prisma.User.findUnique({
+        const employeeLogin = await prisma.Employee.findUnique({
             where: { email },
-            include:{roles:true},
+            include: { roles: true },
         });
-        if (!userLogin) return res.sendStatus(401)//unauthorize.
-        const match = await bcrypt.compare(password, userLogin.password);
+        if (!employeeLogin) return res.sendStatus(401)//unauthorize.
+        const match = await bcrypt.compare(password, employeeLogin.password);
         if (!match) return res.status(403).json({ message: "Invalid email and password!" })//forbidden
-        if (userLogin) {
-            const roles = Object.values(userLogin.roles)
+        if (employeeLogin) {
+            const roles = Object.values(employeeLogin.roles)
             //create jwt
             const accessToken = jwt.sign({
-                "userInfo": {
-                    "id":userLogin.id,
-                    "email": userLogin.email,
-                    "roles": roles
-                },
+                "id": employeeLogin.id,
+                "email": employeeLogin.email,
+                "roles": roles
             }, process.env.ACCESS_TOKEN,
                 {
                     expiresIn: '5m'
                 })
 
             const refreshToken = jwt.sign({
-                "userInfo": {
-                    "name": userLogin.email
-                }
+                "name": employeeLogin.email
             }, process.env.REFRESH_TOKEN,
                 {
                     expiresIn: '7d'
                 })
 
-            const result = await prisma.User.update({
+            const result = await prisma.Employee.update({
                 where: { email, },
                 data: {
                     refreshToken: refreshToken
@@ -51,20 +47,20 @@ const userLogin = async (req, res) => {
                 // secure: true,
                 maxAge: 7 * 24 * 60 * 60 * 1000//7 days
             })
-            const userDetails = {
-                userName: userLogin.fullName,
-                email: userLogin.email,
-                phone: userLogin.phone,
-                gender: userLogin.gender,
-                userId: userLogin.id
+            const employeeDetails = {
+                employeeName: employeeLogin.fullName,
+                email: employeeLogin.email,
+                phone: employeeLogin.phone,
+                gender: employeeLogin.gender,
+                employeeId: employeeLogin.id
             }
-            return res.json({ accessToken, userDetails })
+            return res.json({ accessToken, employeeDetails })
         }
     } catch (err) {
         res.json(err.message);
     }
 }
-const userLogout = async (req, res) => {
+const employeeLogout = async (req, res) => {
     const cookies = req.cookies;
     if (!cookies?.jwt) return res.sendStatus(204)//no content
     res.clearCookie('jwt', {
@@ -74,4 +70,4 @@ const userLogout = async (req, res) => {
     });
     res.json({ message: "Cookie Cleared!" });
 };
-module.exports = { userLogin, userLogout,};
+module.exports = { employeeLogin, employeeLogout, };

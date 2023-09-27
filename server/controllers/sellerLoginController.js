@@ -9,7 +9,7 @@ const sellerLogin = async (req, res) => {
         if (!email || !password) return res.status(400).json({ message: "All fields are mendatory!" })//not found
         const sellerLogin = await prisma.Seller.findUnique({
             where: { email },
-            include:{roles:true},
+            include: { roles: true },
         });
         if (!sellerLogin) return res.sendStatus(401)//unauthorize.
         const match = await bcrypt.compare(password, sellerLogin.password);
@@ -18,20 +18,16 @@ const sellerLogin = async (req, res) => {
             const roles = Object.values(sellerLogin.roles)
             //create jwt
             const accessToken = jwt.sign({
-                "userInfo": {
-                    "id":sellerLogin.id,
-                    "email": sellerLogin.email,
-                    "roles": roles
-                },
+                "id": sellerLogin.id,
+                "email": sellerLogin.email,
+                "roles": roles
             }, process.env.ACCESS_TOKEN,
                 {
                     expiresIn: '5m'
                 })
 
             const refreshToken = jwt.sign({
-                "userInfo": {
-                    "name": sellerLogin.email
-                }
+                "name": sellerLogin.email
             }, process.env.REFRESH_TOKEN,
                 {
                     expiresIn: '7d'
@@ -76,4 +72,4 @@ const sellerLogout = async (req, res) => {
     res.json({ message: "Cookie Cleared!" });
 };
 
-module.exports = { sellerLogin, sellerLogout,};
+module.exports = { sellerLogin, sellerLogout, };

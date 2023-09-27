@@ -20,7 +20,7 @@ const createNewProduct = async (req, res) => {
                     picture: [req.uploadedFiles[0].url],
                     categoriesId: parseInt(categoriesId),
                     sellerId: parseInt(sellerId),
-                    productimage: {
+                    productImage: {
                         create: {
                             fileName: req.uploadedFiles[0].name,
                             url: req.uploadedFiles[0].url,
@@ -28,7 +28,7 @@ const createNewProduct = async (req, res) => {
                     },
                 },
                 include: {
-                    productimage: true
+                    productImage: true
                 }
             })
             res.status(201).json(createProduct);
@@ -38,6 +38,7 @@ const createNewProduct = async (req, res) => {
 
     } catch (err) {
         console.log(err);
+        res.status(500).json({ err: "Error During Creation!" });
     }
 }
 
@@ -50,6 +51,7 @@ const getProductById = async (req, res) => {
         res.status(201).json(getProduct);
     } catch (err) {
         console.log(err);
+        res.status(500).json({ err: "Error retreving Detail!" });
     }
 }
 
@@ -59,20 +61,7 @@ const getAllProducts = async (req, res) => {
         res.status(201).json(productList)
     } catch (err) {
         console.log(err);
-    }
-}
-
-const getAllProductsSeller = async (req, res) => {
-    try {
-        const { sellerId } = parseInt(req.params.id);
-        const productList = await prisma.Product.findMany({
-            where: {
-                sellerId: sellerId,
-            }
-        })
-        res.status(201).json(productList)
-    } catch (err) {
-        console.log(err);
+        res.status(500).json({ err: "Error retreving Details!" });
     }
 }
 
@@ -82,7 +71,7 @@ const getProductBySeller = async (req, res) => {
         const [sellerId, productId] = ids.split('-');
         const getProduct = await prisma.Product.findUnique({
             where: {
-                id: productId,
+                id: parseInt(productId),
                 sellerId: parseInt(sellerId)
             }
         })
@@ -90,18 +79,40 @@ const getProductBySeller = async (req, res) => {
     }
     catch (err) {
         console.log(err);
+        res.status(500).json({ err: "Error retreving Seller Product Detail!" });
     }
 }
 
-const updateProduct = async (req, res) => {
+const getAllProductsBySeller = async (req, res) => {
+    try {
+        const sellerId = parseInt(req.params.id);
+        const seller = await prisma.Seller.findFirst({
+            where: {
+                id: sellerId
+            }
+        })
+        if (!seller) return res.status(404).json({ message: "Seller Not Found!" })
+        const productList = await prisma.Product.findMany({
+            where: {
+                sellerId: sellerId
+            }
+        })
+        res.status(201).json(productList)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ err: "Error retreving Seller All Products Details!" });
+    }
+}
+
+const updateProductBySeller = async (req, res) => {
     try {
         const { ids } = req.params;
         const [sellerId, productId] = ids.split('-');
         const { productTitle, description, price, rating, quantity } = req.body;
         const seller = await prisma.Product.findFirst({
             where: {
+                id: parseInt(productId),
                 sellerId: parseInt(sellerId),
-                productId: parseInt(productId)
             }
         })
         if (!seller) return res.status(404).json({ message: "You are Not Authorize To Edit!" })
@@ -118,7 +129,7 @@ const updateProduct = async (req, res) => {
                     rating: parseFloat(rating),
                     quantity: parseInt(quantity),
                     picture: [req.uploadedFiles[0].url],
-                    productimage: {
+                    productImage: {
                         update: {
                             fileName: req.uploadedFiles[0].name,
                             url: req.uploadedFiles[0].url,
@@ -126,7 +137,7 @@ const updateProduct = async (req, res) => {
                     },
                 },
                 include: {
-                    productimage: true
+                    productImage: true
                 }
             })
             res.status(201).json(updateProduct);
@@ -139,50 +150,112 @@ const updateProduct = async (req, res) => {
                 data: {
                     productTitle,
                     description,
-                    price: parseInt(price),
-                    rating: parseFloat(rating),
-                    quantity: parseInt(quantity),
+                    price: (price),
+                    rating: (rating),
+                    quantity: (quantity),
                 },
                 include: {
-                    productimage: true
+                    productImage: true
                 }
             })
             res.status(201).json(updateProduct);
         }
     } catch (err) {
-        console.log(err)
+        console.log(err);
+        res.status(500).json({ err: "Error Updating Product Details!" })
+    }
+}
+
+const updateParticularProduct = async (req, res) => {
+    try {
+        const productId = parseInt(req.params.id);
+        const { productTitle, description, price, rating, quantity } = req.body;
+        const seller = await prisma.Product.findFirst({
+            where: {
+                id: (productId)
+            }
+        })
+        if (!seller) return res.status(404).json({ message: "You are Not Authorize To Edit!" })
+        if (req.uploadedFiles) {
+            const updateProduct = await prisma.Product.update({
+                where: {
+                    id: (productId),
+                },
+                data: {
+                    productTitle,
+                    description,
+                    price: parseInt(price),
+                    rating: parseFloat(rating),
+                    quantity: parseInt(quantity),
+                    picture: [req.uploadedFiles[0].url],
+                    productImage: {
+                        update: {
+                            fileName: req.uploadedFiles[0].name,
+                            url: req.uploadedFiles[0].url,
+                        },
+                    },
+                },
+                include: {
+                    productImage: true
+                }
+            })
+            res.status(200).json(updateProduct);
+        } else {
+            const updateProduct = await prisma.Product.update({
+                where: {
+                    id: (productId),
+                },
+                data: {
+                    productTitle,
+                    description,
+                    price: (price),
+                    rating: (rating),
+                    quantity: (quantity),
+                },
+                include: {
+                    productImage: true
+                }
+            })
+            res.status(200).json(updateProduct);
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ err: "Error Updating Product Details!" })
     }
 }
 
 const deleteProductById = async (req, res) => {
     try {
-        const { ids } = req.params;
-        const [productId] = ids.split('-');
+        const productId = parseInt(req.params.id);
         const Product = await prisma.Product.findFirst({
             where: {
-                productId: parseInt(productId)
+                id:productId
             }
         })
         if (!Product) return res.status(404).json({ message: "Product Not Found!" })
         const productDeleted = await prisma.Product.delete({
             where: {
                 id: productId
+            },
+            include:{
+                productImage:true
             }
         })
         res.status(201).json(productDeleted);
     } catch (err) {
         console.log(err);
+        res.status(500).json({ err: "Error Deleting Product!" });
     }
 }
 
-const deleteAllProducts = async (req, res) => {
-    try {
-        const deletedAllProducts = await prisma.Product.deleteMany({})
-        res.status(201).json(deletedAllProducts)
-    } catch (err) {
-        console.log(err);
-    }
-}
+// const deleteAllProducts = async (req, res) => {
+//     try {
+//         const deletedAllProducts = await prisma.Product.deleteMany({})
+//         res.status(201).json(deletedAllProducts)
+//     } catch (err) {
+//         console.log(err);
+//     }
+// }
 
 // const ActiveInactiveAllProductsBySeller = async (req, res) => {
 //     try {
@@ -221,31 +294,32 @@ const ActiveInactiveProductBySeller = async (req, res) => {
         })
         if (!seller) return res.status(203).json({ message: "You are not Authorize!" })
         if (seller.isActiveProduct === true) {
+            const inActiveProduct = await prisma.Product.update({
+                where: {
+                    id: parseInt(productId),
+                    sellerId: parseInt(sellerId)
+                },
+                data: {
+                    isActiveProduct: false
+                }
+            })
+            res.status(200).json(inActiveProduct)
+        } else {
             const activeProduct = await prisma.Product.update({
                 where: {
                     id: parseInt(productId),
-                    seller: parseInt(sellerId)
+                    sellerId: parseInt(sellerId)
                 },
                 data: {
-                    isActiveProduct: false
+                    isActiveProduct: true
                 }
             })
             res.status(200).json(activeProduct)
-        } else {
-            const inactiveProduct = await prisma.Product.update({
-                where: {
-                    id: parseInt(productId),
-                    seller: parseInt(sellerId)
-                },
-                data: {
-                    isActiveProduct: false
-                }
-            })
-            res.status(200).json(inactiveProduct)
         }
     } catch (err) {
         console.log(err);
+        res.status(500).json({ err: "Error Updating Status!" });
     }
 }
 
-module.exports = { createNewProduct, getAllProducts, updateProduct, deleteProductById, deleteAllProducts, getProductById, getAllProductsSeller, getProductBySeller, ActiveInactiveProductBySeller };
+module.exports = { createNewProduct, getAllProducts, updateProductBySeller, deleteProductById, getProductById, getAllProductsBySeller, getProductBySeller, ActiveInactiveProductBySeller, updateParticularProduct };

@@ -49,18 +49,22 @@ const getSellerById = async (req, res) => {
             where: {
                 id: SellerId
             },
+            include:{
+                roles:true
+            }
         })
         res.json(Seller);
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ err: 'Error retrieving Seller' });
+
     }
 }
 
 const getAllSellersLists = async (req, res) => {
     try {
         const { page, perPage } = req.query; // Get the desired page from the query
-        const skip = (page - 1) * perPage;// Calculate the number of items to skip based on the page number and items per page
-
+        const skip = (page - 1) * perPage;// Calculate the number of items to skip based on the page number and items per page.
         // Retrieve Sellers with pagination
         const Sellers = await prisma.Seller.findMany({
             skip: skip,
@@ -80,7 +84,7 @@ const activateInactiveSellerStatus = async (req, res) => {
             where:{id:sellerId}
         })
         if(!seller) return res.status(404).json({message:"seller not found!"})
-        if(seller.isActive ===true){
+        if(seller.isActive === true){
             const sellerDeactivate = await prisma.Seller.update({
                 where: { id: sellerId },
                 data: {
@@ -92,13 +96,14 @@ const activateInactiveSellerStatus = async (req, res) => {
             const sellerActivate = await prisma.Seller.update({
                 where: { id: sellerId },
                 data: {
-                    isActive: false
+                    isActive: true
                 }
             })
             res.status(201).json(sellerActivate);
         } 
     } catch (err) {
         console.log(err);
+        res.status(500).json({ error: 'Error Updating Seller Status' });
     }
 }
 
@@ -109,7 +114,7 @@ const updateSeller = async (req, res) => {
             where: { id: SellerId }
         })
         if (!Seller) return res.status(400).json({ message: `${SellerId} not found!` });
-        const { fullName, dob, gender, phone, address, email, houseNo, street, landmark, pincode, city, state } = req.body;
+        const { fullName, dob, gender, phone, email, houseNo, street, landmark, pincode, city, state } = req.body;
         // Split and rearrange the "dd/mm/yyyy" date input to "yyyy-mm-dd" format for a DateTime object
         const [day, month, year] = dob.split('/');
         const formattedDOB = `${year}-${month}-${day}`;
@@ -132,7 +137,8 @@ const updateSeller = async (req, res) => {
                         pincode,
                         address,
                         city,
-                        state
+                        state,
+                        type:"Seller"
                     }
                 }
             }
@@ -140,6 +146,7 @@ const updateSeller = async (req, res) => {
         res.json(SellerUpdate);
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ error: 'Error Updating Details!' });
     }
 }
 
@@ -154,6 +161,7 @@ const deleteSeller = async (req, res) => {
         res.json(deleteComplete);
     } catch (err) {
         console.log(err.message)
+        res.status(500).json({ err: 'Error deleting Values!' });
     }
 }
 

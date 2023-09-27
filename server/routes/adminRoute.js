@@ -10,6 +10,8 @@ router.get("/permissions",adminController.listPermissions)
 router.post("/role/creation",adminController.createRole)
 router.post("/permission/creation", adminController.createPermission)
 router.put("/roleToPermission/creation", adminController.assignPermissionToRole)
+router.put("/update/permission/:id", adminController.updatePermission)
+router.put("/update/role/:id", adminController.updateRole)
 // router.delete("/permission/deletion/:id", adminController.deletePermission)
 // router.delete("/role/deletion/:id", adminController.deleteRole)
 

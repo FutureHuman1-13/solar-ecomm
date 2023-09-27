@@ -28,12 +28,12 @@ const registerEmployee = async (req, res) => {
                 phone,
                 email,
                 password: hashedPassword,
-                roles:{
-                    connect:{id:roleId}
+                roles: {
+                    connect: { id: roleId }
                 }
             },
-            include:{
-                roles:true
+            include: {
+                roles: true
             }
         })
         res.json(createEmployee);
@@ -49,7 +49,7 @@ const getEmployeeById = async (req, res) => {
             where: {
                 id: employeeId
             },
-            include:{roles:true}
+            include: { roles: true }
         })
         res.json(Employee);
     } catch (err) {
@@ -107,25 +107,56 @@ const updateEmployee = async (req, res) => {
     }
 }
 
-const updateEmployeeRoleStatus = async(req,res)=>{
-    try{
-            const {ids} = req.params;
-            const [employeeId,roleId] = ids.split('-');
-            const employee = await prisma.Employee.findFirst({
-                where:{id:parseInt(employeeId)}
+const activeInactiveEmployee = async (req, res) => {
+    try {
+        const employeeId = parseInt(req.params.id);
+        const employee = await prisma.Employee.findFirst({
+            where: { id: employeeId }
+        })
+        if (!employee) return res.status(404).json({ message: "employee not found!" })
+        if (employee.isActive === true) {
+            const employeeDeactivate = await prisma.Employee.update({
+                where: { id: employeeId },
+                data: {
+                    isActive: false
+                }
             })
-            if(!employee) return res.status(404).json({message:"Employee Not Found!"})
-            const updateRole = await prisma.Employee.update({
-                where:{
-                    id:parseInt(employeeId)
-                },
-                data:{
-                    roles:{connect:{id:parseInt(roleId)}}
-                },
-                include:{roles:true}
+            res.status(201).json(employeeDeactivate);
+        } else {
+            const employeeActivate = await prisma.Employee.update({
+                where: { id: employeeId },
+                data: {
+                    isActive: true
+                }
             })
-            res.status(200).json(updateRole);
-    }catch(err){
+            res.status(201).json(employeeActivate);
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Error Updating employee Status' });
+    }
+
+}
+
+const updateEmployeeRoleStatus = async (req, res) => {
+    try {
+        const { ids } = req.params;
+        const [employeeId, roleId] = ids.split('-');
+        const employee = await prisma.Employee.findFirst({
+            where: { id: parseInt(employeeId) }
+        })
+        if (!employee) return res.status(404).json({ message: "Employee Not Found!" })
+        const updateRole = await prisma.Employee.update({
+            where: {
+                id: parseInt(employeeId)
+            },
+            data: {
+                roles: { connect: { id: parseInt(roleId) } }
+            },
+            include: { roles: true }
+        })
+        res.status(200).json(updateRole);
+    } catch (err) {
         console.log(err);
     }
 }
@@ -144,13 +175,13 @@ const deleteEmployeeById = async (req, res) => {
     }
 }
 
-const deleteAllEmployee = async (req, res) => {
-    try {
-        const deleteComplete = await prisma.Employee.deleteMany({});
-        res.json(deleteComplete);
-    } catch (err) {
-        console.log(err.message)
-    }
-}
+// const deleteAllEmployee = async (req, res) => {
+//     try {
+//         const deleteComplete = await prisma.Employee.deleteMany({});
+//         res.json(deleteComplete);
+//     } catch (err) {
+//         console.log(err.message)
+//     }
+// }
 
-module.exports = { registerEmployee, getEmployeeById, updateEmployee, deleteEmployeeById, getAllEmployees,deleteAllEmployee,updateEmployeeRoleStatus };
+module.exports = { registerEmployee, getEmployeeById, updateEmployee,activeInactiveEmployee, deleteEmployeeById, getAllEmployees,updateEmployeeRoleStatus };
