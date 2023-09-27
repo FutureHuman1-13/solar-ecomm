@@ -2,7 +2,7 @@ const prisma = require('../db/prisma');
 
 const createNewCategories = async (req, res) => {
     try {
-        const sellerId = parseInt(req.parmas.id);
+        const sellerId = parseInt(req.params.id);
         const { catName } = req.body;
         if (!catName) return res.status(400).json({
             message:
@@ -11,48 +11,49 @@ const createNewCategories = async (req, res) => {
         const createCategories = await prisma.Categories.create({
             data: {
                 catName,
-                sellerId:sellerId
+                sellerId: sellerId
             }
         })
         res.status(201).json(createCategories);
     } catch (err) {
         console.log(err);
+        return res.status(500).json({message:"Inernal Server Error!"})
     }
 }
 
-const getCategoriesById = async(req,res)=>{
-    try{
-        const {ids} = req.parmas;
-        const [sellerId,categoriesId] = ids.split('-');
+const getCategoriesById = async (req, res) => {
+    try {
+        const { ids } = req.parmas;
+        const [sellerId, categoriesId] = ids.split('-');
         const getCategorie = await prisma.Categories.findUnique({
-            where:{
-                id:categoriesId,
-                sellerId:parseInt(sellerId)
+            where: {
+                id: categoriesId,
+                sellerId: parseInt(sellerId)
             }
-        })  
+        })
         res.status(201).json(getCategorie)
-    }catch(err){
+    } catch (err) {
         console.log(err);
     }
 }
 
-const getAllCategories = async(req,res)=>{
-    try{
-        const getAllCategories = await prisma.Categories.findMany({})  
+const getAllCategories = async (req, res) => {
+    try {
+        const getAllCategories = await prisma.Categories.findMany({})
         res.status(201).json(getAllCategories);
-    }catch(err){
+    } catch (err) {
         console.log(err);
     }
 }
 
-const getAllCategoriesBySeller = async(req,res)=>{
-    try{
+const getAllCategoriesBySeller = async (req, res) => {
+    try {
         const sellerId = parseInt(req.parmas.id);
         const getAllCategories = await prisma.Categories.findMany({
-            where:{sellerId:sellerId,}
-        })  
+            where: { sellerId: sellerId, }
+        })
         res.status(201).json(getAllCategories);
-    }catch(err){
+    } catch (err) {
         console.log(err);
     }
 }
@@ -82,24 +83,24 @@ const updateCategories = async (req, res) => {
 }
 
 const deleteCategoriesBySeller = async (req, res) => {
-    try{
+    try {
         const { ids } = req.parmas;
         const [sellerId, categoriesId] = ids.split('-');
         const deleteCategorie = await prisma.Categories.delete({
             where: {
                 id: parseInt(categoriesId),
-                sellerId:parseInt(sellerId),
+                sellerId: parseInt(sellerId),
             }
         })
         res.status(201).json(deleteCategorie)
-    }catch(err){
+    } catch (err) {
         console.log(err);
     }
-  
+
 }
 
 const deleteCategoriesById = async (req, res) => {
-    try{
+    try {
         const categoriesId = parseInt(req.parmas.id);
         const deleteCategorie = await prisma.Categories.delete({
             where: {
@@ -107,18 +108,18 @@ const deleteCategoriesById = async (req, res) => {
             }
         })
         res.status(201).json(deleteCategorie)
-    }catch(err){
+    } catch (err) {
         console.log(err);
     }
-  
+
 }
 
-const deleteAllCategories = async(req,res)=>{
-    try{
+const deleteAllCategories = async (req, res) => {
+    try {
         const deleteCategories = await prisma.Categories.deleteMany({})
         res.status(201).json(deleteCategories)
-    }catch(err){
+    } catch (err) {
         console.log(err);
-    }   
+    }
 }
-module.exports = { createNewCategories, updateCategories, deleteCategoriesById,deleteCategoriesBySeller,deleteAllCategories,getCategoriesById,getAllCategories,getAllCategoriesBySeller}
+module.exports = { createNewCategories, updateCategories, deleteCategoriesById, deleteCategoriesBySeller, deleteAllCategories, getCategoriesById, getAllCategories, getAllCategoriesBySeller }

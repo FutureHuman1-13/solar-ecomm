@@ -23,6 +23,7 @@ app.use("/product",require("./routes/productRoute"));
 app.use("/categories",require("./routes/categoriesRoute"));
 app.use("/seller",require("./routes/sellerRoute"));
 app.use("/seller",require("./routes/sellerLoginRoute"))
+app.use("/customer",require("./routes/customerRoute"))
 
 app.listen(PORT,()=>{
     console.log(`server is listening on Port : ${PORT}`);

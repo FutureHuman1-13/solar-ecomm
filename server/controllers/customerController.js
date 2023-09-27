@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 // const jwt = require('jsonwebtoken');
 const prisma = require('../db/prisma');
 
-const registerEmployee = async (req, res) => {
+const registerCustomer = async (req, res) => {
     try {
         const roleId = parseInt(req.params.id);
         const { fullName, gender, dob, phone, email, password, } = req.body;
@@ -12,7 +12,7 @@ const registerEmployee = async (req, res) => {
         // Split and rearrange the "dd/mm/yyyy" date input to "yyyy-mm-dd" format for a DateTime object
         const [day, month, year] = dob.split('/');
         const formattedDOB = `${year}-${month}-${day}`;
-        const duplicate = await prisma.Employee.findMany({
+        const duplicate = await prisma.Customer.findMany({
             where: {
                 email,
                 phone
@@ -20,7 +20,7 @@ const registerEmployee = async (req, res) => {
         })//if duplicate
         if (duplicate.length > 0) return res.status(409).json({ message: "Duplicate User!" })//conflict
         const hashedPassword = await bcrypt.hash(password, 10);
-        const createEmployee = await prisma.Employee.create({
+        const createCustomer = await prisma.Customer.create({
             data: {
                 fullName,
                 gender,
@@ -36,49 +36,49 @@ const registerEmployee = async (req, res) => {
                 roles:true
             }
         })
-        res.json(createEmployee);
+        res.json(createCustomer);
     } catch (err) {
         console.log(err.message);
     }
 }
 
-const getEmployeeById = async (req, res) => {
+const getCustomerById = async (req, res) => {
     try {
-        const employeeId = parseInt(req.params.id);
-        const Employee = await prisma.Employee.findUnique({
+        const CustomerId = parseInt(req.params.id);
+        const Customer = await prisma.Customer.findUnique({
             where: {
-                id: employeeId
+                id: CustomerId
             },
             include:{roles:true}
         })
-        res.json(Employee);
+        res.json(Customer);
     } catch (err) {
         console.log(err.message);
     }
 }
 
-const getAllEmployees = async (req, res) => {
+const getAllCustomers = async (req, res) => {
     try {
-        const getUsers = await prisma.Employee.findMany({})
+        const getUsers = await prisma.Customer.findMany({})
         res.status(201).json(getUsers)
     } catch (err) {
         console.log(err);
     }
 }
 
-const updateEmployee = async (req, res) => {
+const updateCustomerById = async (req, res) => {
     try {
-        const employeeId = parseInt(req.params.id);
-        const employee = await prisma.Employee.findFirst({
-            where: { id: employeeId }
+        const CustomerId = parseInt(req.params.id);
+        const Customer = await prisma.Customer.findFirst({
+            where: { id: CustomerId }
         })
-        if (!employee) return res.status(400).json({ message: `Employee with ${employeeId} not found!` });
+        if (!Customer) return res.status(400).json({ message: `Customer with ${CustomerId} not found!` });
         const { fullName, dob, gender, phone, address, email, houseNo, street, landmark, pincode, city, state } = req.body;
         // Split and rearrange the "dd/mm/yyyy" date input to "yyyy-mm-dd" format for a DateTime object
         const [day, month, year] = dob.split('/');
         const formattedDOB = `${year}-${month}-${day}`;
-        const employeeUpdate = await prisma.Employee.update({
-            where: { id: employeeId },
+        const CustomerUpdate = await prisma.Customer.update({
+            where: { id: CustomerId },
             data: {
                 fullName,
                 dob: new Date(formattedDOB),// Convert the formatted date to a JavaScript Date object
@@ -100,24 +100,24 @@ const updateEmployee = async (req, res) => {
                 }
             }
         })
-        res.json(employeeUpdate);
+        res.json(CustomerUpdate);
 
     } catch (err) {
         console.log(err.message);
     }
 }
 
-const updateEmployeeRoleStatus = async(req,res)=>{
+const updateCustomerRoleStatus = async(req,res)=>{
     try{
             const {ids} = req.params;
-            const [employeeId,roleId] = ids.split('-');
-            const employee = await prisma.Employee.findFirst({
-                where:{id:parseInt(employeeId)}
+            const [CustomerId,roleId] = ids.split('-');
+            const Customer = await prisma.Customer.findFirst({
+                where:{id:parseInt(CustomerId)}
             })
-            if(!employee) return res.status(404).json({message:"Employee Not Found!"})
-            const updateRole = await prisma.Employee.update({
+            if(!Customer) return res.status(404).json({message:"Customer Not Found!"})
+            const updateRole = await prisma.Customer.update({
                 where:{
-                    id:parseInt(employeeId)
+                    id:parseInt(CustomerId)
                 },
                 data:{
                     roles:{connect:{id:parseInt(roleId)}}
@@ -130,12 +130,12 @@ const updateEmployeeRoleStatus = async(req,res)=>{
     }
 }
 
-const deleteEmployeeById = async (req, res) => {
+const deleteCustomerById = async (req, res) => {
     try {
-        const employeeId = parseInt(req.params.id);
-        const deleteComplete = await prisma.Employee.delete({
+        const CustomerId = parseInt(req.params.id);
+        const deleteComplete = await prisma.Customer.delete({
             where: {
-                id: employeeId
+                id: CustomerId
             }
         });
         res.json(deleteComplete);
@@ -144,13 +144,13 @@ const deleteEmployeeById = async (req, res) => {
     }
 }
 
-const deleteAllEmployee = async (req, res) => {
+const deleteAllCustomer = async (req, res) => {
     try {
-        const deleteComplete = await prisma.Employee.deleteMany({});
+        const deleteComplete = await prisma.Customer.deleteMany({});
         res.json(deleteComplete);
     } catch (err) {
         console.log(err.message)
     }
 }
 
-module.exports = { registerEmployee, getEmployeeById, updateEmployee, deleteEmployeeById, getAllEmployees,deleteAllEmployee,updateEmployeeRoleStatus };
+module.exports = { registerCustomer, getCustomerById, updateCustomerById, deleteCustomerById, getAllCustomers,deleteAllCustomer,updateCustomerRoleStatus };

@@ -88,7 +88,7 @@ model Customer {
   phone            Decimal       @unique
   email            String        @unique
   password         String
-  address          String
+  address          String?
   houseNo          String?
   street           String?
   landmark         String?
@@ -104,8 +104,8 @@ model Customer {
   cart             Cart[]
   profileImage     ProfileImage? @relation("CustomerProfileImage")
   roles            Role[]        @relation("customerRole")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }
 
 model Categories {
@@ -205,7 +205,7 @@ model Addresses {
   houseNo    String?
   street     String?
   landmark   String?
-  address    String?
+  address1   String?
   pincode    Int
   city       String
   state      String

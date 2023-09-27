@@ -6,7 +6,9 @@ const createNewProduct = async (req, res) => {
         const { ids } = req.params;
         const [sellerId, categoriesId] = ids.split('-');
         const { productTitle, description, price, rating, quantity } = req.body;
-        if (!productTitle, !description, !price, !rating, !quantity, !color) return res.status(400).json({ message: "All Fields are mendatory!" });
+        if (!productTitle, !description, !price, !rating, !quantity) {
+            return res.status(400).json({ message: "All Fields are mendatory!" });
+        }
         if (req.uploadedFiles) {
             const createProduct = await prisma.Product.create({
                 data: {
@@ -182,30 +184,30 @@ const deleteAllProducts = async (req, res) => {
     }
 }
 
-const ActiveInactiveAllProductsBySeller = async (req, res) => {
-    try {
-        const sellerId = parseInt(req.params.id);
-        const seller = await prisma.Product.findFirst({
-            where: { id: sellerId }
-        })
-        if (!seller) return res.status(203).json({ message: "You Are Not Authorize!" })
-        if (seller.isActiveProduct === true) {
-            const inactiveProducts = await prisma.Product.updateMany({
-                where: { sellerId: sellerId },
-                data: { isActiveProduct: false }
-            })
-            res.status(201).json(inactiveProducts)
-        } else {
-            const activeProducts = await prisma.Product.updateMany({
-                where: { sellerId: sellerId },
-                data: { isActiveProduct: true }
-            })
-            res.status(201).json(activeProducts)
-        }
-    } catch (err) {
-        console.log(err);
-    }
-}
+// const ActiveInactiveAllProductsBySeller = async (req, res) => {
+//     try {
+//         const sellerId = parseInt(req.params.id);
+//         const seller = await prisma.Product.findFirst({
+//             where: { id: sellerId }
+//         })
+//         if (!seller) return res.status(203).json({ message: "You Are Not Authorize!" })
+//         if (seller.isActiveProduct === true) {
+//             const inactiveProducts = await prisma.Product.updateMany({
+//                 where: { sellerId: sellerId },
+//                 data: { isActiveProduct: false }
+//             })
+//             res.status(201).json(inactiveProducts)
+//         } else {
+//             const activeProducts = await prisma.Product.updateMany({
+//                 where: { sellerId: sellerId },
+//                 data: { isActiveProduct: true }
+//             })
+//             res.status(201).json(activeProducts)
+//         }
+//     } catch (err) {
+//         console.log(err);
+//     }
+// }
 
 const ActiveInactiveProductBySeller = async (req, res) => {
     try {
@@ -214,29 +216,29 @@ const ActiveInactiveProductBySeller = async (req, res) => {
         const seller = await prisma.Product.findFirst({
             where: {
                 id: parseInt(productId),
-                sellerId:parseInt(sellerId)
+                sellerId: parseInt(sellerId)
             }
         })
-        if(!seller) return res.status(203).json({message:"You are not Authorize!"})
-        if(seller.isActiveProduct === true){
+        if (!seller) return res.status(203).json({ message: "You are not Authorize!" })
+        if (seller.isActiveProduct === true) {
             const activeProduct = await prisma.Product.update({
-                where:{
-                    id:parseInt(productId),
-                    seller:parseInt(sellerId)
+                where: {
+                    id: parseInt(productId),
+                    seller: parseInt(sellerId)
                 },
-                data:{
-                    isActiveProduct:false
+                data: {
+                    isActiveProduct: false
                 }
             })
             res.status(200).json(activeProduct)
-        }else{
+        } else {
             const inactiveProduct = await prisma.Product.update({
-                where:{
-                    id:parseInt(productId),
-                    seller:parseInt(sellerId)
+                where: {
+                    id: parseInt(productId),
+                    seller: parseInt(sellerId)
                 },
-                data:{
-                    isActiveProduct:false
+                data: {
+                    isActiveProduct: false
                 }
             })
             res.status(200).json(inactiveProduct)
@@ -246,4 +248,4 @@ const ActiveInactiveProductBySeller = async (req, res) => {
     }
 }
 
-module.exports = { createNewProduct, getAllProducts, updateProduct, deleteProductById, deleteAllProducts, getProductById, getAllProductsSeller, getProductBySeller, ActiveInactiveAllProductsBySeller,ActiveInactiveProductBySeller };
+module.exports = { createNewProduct, getAllProducts, updateProduct, deleteProductById, deleteAllProducts, getProductById, getAllProductsSeller, getProductBySeller, ActiveInactiveProductBySeller };

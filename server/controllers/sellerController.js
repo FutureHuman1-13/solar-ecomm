@@ -4,8 +4,9 @@ const prisma = require('../db/prisma');
 
 const registerSeller = async (req, res) => {
     try {
+        const roleId = parseInt(req.params.id);
         const { fullName, gender, dob, phone, email,password} = req.body;
-        if (!fullName, !gender, !dob, !phone, !email, password) {
+        if (!fullName, !gender, !dob, !phone, !email, !password) {
             return res.status(400).json({ message: "All fields are mendatory!" })
         }
         // Split and rearrange the "dd/mm/yyyy" date input to "yyyy-mm-dd" format for a DateTime object
@@ -27,7 +28,12 @@ const registerSeller = async (req, res) => {
                 phone,
                 email,
                 password: hashedPassword,
-                roles:"Seller"
+                roles:{
+                    connect:{id:roleId}
+                }
+            },
+            include:{
+                roles:true
             }
         })
         res.json(createSeller);

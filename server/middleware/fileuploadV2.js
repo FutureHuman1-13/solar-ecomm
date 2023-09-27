@@ -12,7 +12,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   // databaseURL:
   //   "https://react-native-maps-74b50-default-rtdb.asia-southeast1.firebasedatabase.app",
-  storageBucket: "solar-app.appspot.com",
+  storageBucket: "solar-app-5ea76.appspot.com",
 });
 
 const bucket = admin.storage().bucket();

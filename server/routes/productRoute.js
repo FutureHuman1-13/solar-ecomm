@@ -18,7 +18,7 @@ router.put("/:ids",
     fileupload.upload.any(),
     fileupload.uploadImagesToFirebaseUpdate,
     productController.updateProduct)
-router.put("/seller", productController.ActiveInactiveAllProductsBySeller)
+router.put("/seller?:ids", productController.ActiveInactiveProductBySeller)
 router.delete("/:ids", productController.deleteProductById)
 router.delete("/", productController.deleteAllProducts)
 
