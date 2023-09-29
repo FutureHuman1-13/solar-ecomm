@@ -3,7 +3,6 @@ const router = express.Router();
 const sellerController = require("../controllers/sellerController");
 const checkPermissionRole = require("../middleware/checkPermissionRole")
 
-// const verifyRoles = require('../middleware/verifyRoles');
 const verifyJwt = require('../middleware/verifyJwt');
 
 router.post("/register/:id", sellerController.registerSeller)

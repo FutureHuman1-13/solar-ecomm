@@ -20,13 +20,14 @@
 const checkPermissions = (requiredPermission) => {
   return (req, res, next) => {
     // console.log(req.Employee.roles)
+    console.log(req.roles);
     const Role = req.roles
       .map((role) => role.permissions.map((permission) => permission.name))
       .flat();
-    const hasPermission = requiredPermission.every((permission) =>
+    const hasPermission = requiredPermission.every(permission =>
       Role.includes(permission)
     );
-    console.log(hasPermission)
+    // console.log(hasPermission)
     if (!hasPermission) {
       return res.status(403).json({ error: 'Access denied:You have not permissions' });
     }

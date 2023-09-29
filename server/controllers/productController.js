@@ -2,7 +2,7 @@ const prisma = require('../db/prisma');
 
 const createNewProduct = async (req, res) => {
     try {
-        console.log(req.uploadedFiles)
+        // console.log(req.uploadedFiles)
         const { ids } = req.params;
         const [sellerId, categoriesId] = ids.split('-');
         const { productTitle, description, price, rating, quantity } = req.body;
