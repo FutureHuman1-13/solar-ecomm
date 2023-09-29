@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 require('dotenv').config
-// const prisma = require('../db/prisma');
+const prisma = require('../db/prisma');
 
 const verifyJwt = async (req, res, next) => {
     try {
@@ -16,10 +16,10 @@ const verifyJwt = async (req, res, next) => {
                 req.id    = decoded.id
                 req.email = decoded.email;
                 req.roles = decoded.roles;
-                // Assuming user has a 'roles' property in the JWT payload
-                // req.user = await prisma.User.findUnique({
-                //     where: { id: user.id },
-                //     include: { roles: true },
+                // // Assuming Employee has a 'roles' property in the JWT payload
+                // req.Employee = await prisma.Employee.findUnique({
+                //     where: { id: Employee.id },
+                //     include: { roles: { include: { permissions: true } } },
                 // });
                 next();
             })

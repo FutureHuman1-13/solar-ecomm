@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const sellerLoginController = require('../controllers/sellerLoginController');
+const sellerLoginController = require('../../controllers/authController/sellerLoginController')
 
 router.post('/seller-login',sellerLoginController.sellerLogin);
 // router.get('/admin/refresh',sellerLoginController.loginRefresh);

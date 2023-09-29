@@ -18,12 +18,13 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/admin",require("./routes/adminRoute"));
 app.use("/admin",require("./routes/employeeRoute"));
-app.use("/admin",require("./routes/employeeLoginRoute.js"))
+app.use("/admin",require("./routes/authRoute/employeeLoginRoute.js"))
 app.use("/product",require("./routes/productRoute"));
 app.use("/categories",require("./routes/categoriesRoute"));
 app.use("/seller",require("./routes/sellerRoute"));
-app.use("/seller",require("./routes/sellerLoginRoute"))
+app.use("/seller",require("./routes/authRoute/sellerLoginRoute"))
 app.use("/customer",require("./routes/customerRoute"))
+app.use("/customer",require("./routes/authRoute/customerLoginRoute"))
 
 app.listen(PORT,()=>{
     console.log(`server is listening on Port : ${PORT}`);
