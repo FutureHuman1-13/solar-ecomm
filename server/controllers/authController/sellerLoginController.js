@@ -113,7 +113,7 @@ const handleRefreshToken = async (req, res) => {
                 process.env.ACCESS_TOKEN,
                 { expiresIn: "5m" }
             )
-            const refreshToken = jwt.sign({
+            const refreshNewToken = jwt.sign({
                 "id": foundSeller.id,
                 "email": foundSeller.email,
                 "roles": roles
@@ -123,9 +123,9 @@ const handleRefreshToken = async (req, res) => {
                 })
             const updateSeller = await prisma.Seller.update({
                 where:{id:foundSeller.id},
-                data:{refreshToken:refreshToken}
+                data:{refreshToken:refreshNewToken}
             })
-            res.cookie('jwt', refreshToken, {
+            res.cookie('jwt', refreshNewToken, {
                 httpOnly: true,
                 sameSite: "None",
                 // secure: true,
@@ -135,4 +135,99 @@ const handleRefreshToken = async (req, res) => {
         }
     );
 }
-module.exports = { sellerLogin, sellerLogout, handleRefreshToken};
+
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(404).json("Please enter Correct Email!");
+        const foundSeller = await prisma.Seller.findFirst({
+            where:{email:email}
+        })
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        const resetTokenExpiry = new Date(Date.now() +  60 * 1000);//token expiry in 1mn.
+        const resetLink = `https://example.com/reset-password?token=${resetToken}-${foundSeller.id}`;
+        // const emailTemplatePath = path.join(__dirname, '..', 'views', 'password_reset_user.ejs');
+        // const emailTemplate = fs.readFileSync(emailTemplatePath, 'utf-8');
+        const Seller = await prisma.Seller.update({
+            where: { email },
+            data: {
+                resetToken: resetToken,
+                resetTokenExpiry: resetTokenExpiry
+            }
+        });
+        res.status(200).json({ Seller });
+
+        //send an email with  a link to reset the password. 
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: process.env.EMAIL_ADMIN,
+                pass: process.env.EMAIL_ADMIN_PASSWORD,
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_ADMIN,
+            to: email,
+            subject: 'Password Reset',
+            text: resetLink,
+        }
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Email error:', error);
+                res.status(500).json({ error: 'Internal server error' });
+            } else {
+                console.log(info);
+                res.status(200).json({ message: 'Password reset email sent successfully!' });
+            }
+        });
+    }
+    catch (err) {
+        console.error('Error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+const resetPassword = async (req, res) => {
+    try {
+        const {ids} = req.params;
+        const [resetToken,SellerId] = ids.split('-') 
+        const { newPassword, confirmPassword } = req.body;
+        const Seller = await prisma.Seller.findFirst({
+            where: {
+                id:parseInt(SellerId),
+                resetToken: resetToken,
+                resetTokenExpiry: {
+                    gte: new Date(),
+                },
+            },
+        });
+
+        if (!Seller) {
+            return res.status(400).json({ message: 'Invalid or expired token!' });
+        }
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ message: "Password do not match!" });
+        }
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Find the user by reset token and update the password
+        const updatedUser = await prisma.Seller.update({
+            where: { resetToken },
+            data: {
+                password: hashedPassword,
+                resetToken: null,
+                resetTokenExpiry: null
+            },
+        });
+
+        res.status(200).json({ updatedUser,message: 'Password reset successfully' });
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+
+}
+module.exports = { sellerLogin, sellerLogout, handleRefreshToken,forgotPassword,resetPassword};

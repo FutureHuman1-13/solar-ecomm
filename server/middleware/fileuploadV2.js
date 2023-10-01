@@ -56,6 +56,8 @@ function uploadImagesToFirebase(req, res, next) {
     })
   ).catch((error) => next(error));
 }
+
+
 function uploadImagesToFirebaseUpdate(req, res, next) {
   // console.log(req.files);
   const files = req.files;

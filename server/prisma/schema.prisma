@@ -139,7 +139,7 @@ model Product {
   categoriesId    Int
   cart            Cart[]
   order           Order[]
-  productImage    ProductImage[]  @relation("productImage")
+  productImage    ProductImage[] @relation("productImage")
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 }
@@ -156,21 +156,22 @@ model Cart {
 }
 
 model Order {
-  id            Int       @id @default(autoincrement())
-  status        String    @default("Order Placed")
-  quantity      Int       @default(0)
-  size          String?   @default("")
-  paymentStatus String    @default("pending")
-  customerId    Int
-  productId     Int
-  product       Product   @relation(fields: [productId], references: [id])
-  customer      Customer  @relation(fields: [customerId], references: [id])
-  address       Addresses @relation(fields: [addressId], references: [id])
-  addressId     Int
-  seller        Seller    @relation(fields: [sellerId], references: [id])
-  sellerId      Int
-  orderOn       DateTime  @default(now())
-  updatedOn     DateTime  @updatedAt
+  id                Int       @id @default(autoincrement())
+  status            String    @default("Order Placed")
+  quantity          Int       @default(0)
+  paymentStatus     String    @default("pending")
+  customerId        Int
+  productId         Int
+  product           Product   @relation(fields: [productId], references: [id])
+  customer          Customer  @relation(fields: [customerId], references: [id])
+  billingAddresses  Addresses @relation("bl", fields: [billingAddressId], references: [id])
+  billingAddressId  Int
+  shippingAddresses Addresses @relation("sh", fields: [shippingAddressId], references: [id])
+  shippingAddressId Int
+  seller            Seller    @relation(fields: [sellerId], references: [id])
+  sellerId          Int
+  orderOn           DateTime  @default(now())
+  updatedOn         DateTime  @updatedAt
 }
 
 model ProfileImage {
@@ -192,30 +193,31 @@ model ProductImage {
   fileName   String
   url        String
   productId  Int
-  product    Product  @relation("productImage",fields: [productId], references: [id],onDelete: Cascade)
+  product    Product  @relation("productImage", fields: [productId], references: [id], onDelete: Cascade)
   uploadedAt DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
 
 model Addresses {
-  id         Int          @id @default(autoincrement())
-  fullName   String
-  phone      Decimal
-  type       AddressType?
-  houseNo    String?
-  street     String?
-  landmark   String?
+  id            Int          @id @default(autoincrement())
+  fullName      String
+  phone         Decimal
+  type          AddressType?
+  houseNo       String?
+  street        String?
+  landmark      String?
   fullAddress   String?
-  pincode    Int
-  city       String
-  state      String
-  myorder    Order[]
-  customer   Customer?    @relation(fields: [customerId], references: [id])
-  customerId Int?
-  seller     Seller?      @relation(fields: [sellerId], references: [id])
-  sellerId   Int?
-  employee   Employee?    @relation(fields: [employeeId], references: [id])
-  employeeId Int?
+  pincode       Int
+  city          String
+  state         String
+  billingOrder  Order[]      @relation("bl")
+  shippingOrder Order[]      @relation("sh")
+  customer      Customer?    @relation(fields: [customerId], references: [id])
+  customerId    Int?
+  seller        Seller?      @relation(fields: [sellerId], references: [id])
+  sellerId      Int?
+  employee      Employee?    @relation(fields: [employeeId], references: [id])
+  employeeId    Int?
 }
 
 enum AddressType {

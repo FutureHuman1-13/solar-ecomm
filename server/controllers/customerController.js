@@ -6,7 +6,7 @@ const registerCustomer = async (req, res) => {
     try {
         const roleId = parseInt(req.params.id);
         const { fullName, gender, dob, phone, email, password, } = req.body;
-        if (!fullName, !gender, !dob, !phone, !email, !password) {
+        if (!fullName || !gender || !dob || !phone || !email || !password) {
             return res.status(400).json({ message: "All fields are mendatory!" })
         }
         // Split and rearrange the "dd/mm/yyyy" date input to "yyyy-mm-dd" format for a DateTime object
@@ -28,12 +28,12 @@ const registerCustomer = async (req, res) => {
                 phone,
                 email,
                 password: hashedPassword,
-                roles:{
-                    connect:{id:roleId}
+                roles: {
+                    connect: { id: roleId }
                 }
             },
-            include:{
-                roles:true
+            include: {
+                roles: true
             }
         })
         res.json(createCustomer);
@@ -49,7 +49,7 @@ const getCustomerById = async (req, res) => {
             where: {
                 id: CustomerId
             },
-            include:{roles:true}
+            include: { roles: true }
         })
         res.json(Customer);
     } catch (err) {
@@ -70,62 +70,115 @@ const updateCustomerById = async (req, res) => {
     try {
         const CustomerId = parseInt(req.params.id);
         const Customer = await prisma.Customer.findFirst({
-            where: { id: CustomerId }
+            where: { id: CustomerId },
+            include: { profileImage: true },
         })
         if (!Customer) return res.status(400).json({ message: `Customer with ${CustomerId} not found!` });
         const { fullName, dob, gender, phone, address, email, houseNo, street, landmark, pincode, city, state } = req.body;
+
+        if (!fullName || !dob || !gender || !phone || !email || !pincode || !city || !state) return res.status(400).json({ messsage: "Please Fill Mendatory Field's!" })
+
         // Split and rearrange the "dd/mm/yyyy" date input to "yyyy-mm-dd" format for a DateTime object
         const [day, month, year] = dob.split('/');
         const formattedDOB = `${year}-${month}-${day}`;
-        const CustomerUpdate = await prisma.Customer.update({
-            where: { id: CustomerId },
-            data: {
-                fullName,
-                dob: new Date(formattedDOB),// Convert the formatted date to a JavaScript Date object
-                gender,
-                phone,
-                email,
-                addresses: {
-                    create: {
+        if (req.uploadedFiles) {
+            if (!Customer.profileImage) {
+                const CustomerUpdate = await prisma.Customer.update({
+                    where: { id: CustomerId },
+                    data: {
                         fullName,
+                        dob: new Date(formattedDOB),// Convert the formatted date to a JavaScript Date object
+                        gender,
                         phone,
+                        email,
                         address,
                         houseNo,
                         street,
                         landmark,
-                        pincode,
+                        pincode: parseInt(pincode),
                         city,
-                        state
+                        state,
+                        profileImage: {
+                            create: {
+                                fileName: req.uploadedFiles[0].name,
+                                url: req.uploadedFiles[0].url,
+                            }
+                        }
                     }
-                }
+                })
+                res.status(200).json(CustomerUpdate);
+            } else {
+                const CustomerUpdate = await prisma.Customer.update({
+                    where: { id: CustomerId },
+                    data: {
+                        fullName,
+                        dob: new Date(formattedDOB),// Convert the formatted date to a JavaScript Date object
+                        gender,
+                        phone,
+                        email,
+                        address,
+                        houseNo,
+                        street,
+                        landmark,
+                        pincode: parseInt(pincode),
+                        city,
+                        state,
+                        profileImage: {
+                            update: {
+                                fileName: req.uploadedFiles[0].name,
+                                url: req.uploadedFiles[0].url,
+                                // Customer: { connect: { id: CustomerId } },
+                            }
+                        }
+                    }
+                })
+                res.status(200).json(CustomerUpdate);
             }
-        })
-        res.json(CustomerUpdate);
-
+        } else {
+            const CustomerUpdate = await prisma.Customer.update({
+                where: { id: CustomerId },
+                data: {
+                    fullName,
+                    dob: new Date(formattedDOB),// Convert the formatted date to a JavaScript Date object
+                    gender,
+                    phone,
+                    email,
+                    address,
+                    houseNo,
+                    street,
+                    landmark,
+                    pincode: parseInt(pincode),
+                    city,
+                    state
+                }
+            })
+            res.status(200).json(CustomerUpdate);
+        }
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ err: "Internal Server Error!" })
     }
 }
 
-const updateCustomerRoleStatus = async(req,res)=>{
-    try{
-            const {ids} = req.params;
-            const [CustomerId,roleId] = ids.split('-');
-            const Customer = await prisma.Customer.findFirst({
-                where:{id:parseInt(CustomerId)}
-            })
-            if(!Customer) return res.status(404).json({message:"Customer Not Found!"})
-            const updateRole = await prisma.Customer.update({
-                where:{
-                    id:parseInt(CustomerId)
-                },
-                data:{
-                    roles:{connect:{id:parseInt(roleId)}}
-                },
-                include:{roles:true}
-            })
-            res.status(200).json(updateRole);
-    }catch(err){
+const updateCustomerRoleStatus = async (req, res) => {
+    try {
+        const { ids } = req.params;
+        const [CustomerId, roleId] = ids.split('-');
+        const Customer = await prisma.Customer.findFirst({
+            where: { id: parseInt(CustomerId) }
+        })
+        if (!Customer) return res.status(404).json({ message: "Customer Not Found!" })
+        const updateRole = await prisma.Customer.update({
+            where: {
+                id: parseInt(CustomerId)
+            },
+            data: {
+                roles: { connect: { id: parseInt(roleId) } }
+            },
+            include: { roles: true }
+        })
+        res.status(200).json(updateRole);
+    } catch (err) {
         console.log(err);
     }
 }
@@ -153,4 +206,4 @@ const deleteAllCustomer = async (req, res) => {
     }
 }
 
-module.exports = { registerCustomer, getCustomerById, updateCustomerById, deleteCustomerById, getAllCustomers,deleteAllCustomer,updateCustomerRoleStatus };
+module.exports = { registerCustomer, getCustomerById, updateCustomerById, deleteCustomerById, getAllCustomers, deleteAllCustomer, updateCustomerRoleStatus };

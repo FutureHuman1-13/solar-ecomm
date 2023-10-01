@@ -5,7 +5,7 @@ const router = express.Router();
 router.post('/employee-login',employeeLoginController.employeeLogin);
 router.get('/employee-refresh',employeeLoginController.handleRefreshToken);
 router.get('/employee-logout',employeeLoginController.employeeLogout);
-// router.post('/admin-forgot-password', employeeLoginController.forgotPassword);
-// router.post('/admin-reset-password', employeeLoginController.resetPassword);
+router.post('/employee-forgot', employeeLoginController.forgotPassword);
+router.post('/employee-reset/:ids', employeeLoginController.resetPassword);
 
 module.exports = router;

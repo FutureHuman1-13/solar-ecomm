@@ -74,6 +74,9 @@ const updateEmployee = async (req, res) => {
         })
         if (!employee) return res.status(400).json({ message: `Employee with ${employeeId} not found!` });
         const { fullName, dob, gender, phone, address, email, houseNo, street, landmark, pincode, city, state } = req.body;
+
+        if (!fullName || !dob || !gender || !phone || !email || !pincode || !city || !state) return res.status(400).json({ messsage: "Please Fill Mendatory Field's!" })
+
         // Split and rearrange the "dd/mm/yyyy" date input to "yyyy-mm-dd" format for a DateTime object
         const [day, month, year] = dob.split('/');
         const formattedDOB = `${year}-${month}-${day}`;

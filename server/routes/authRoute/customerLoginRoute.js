@@ -5,7 +5,7 @@ const customerLoginController = require('../../controllers/authController/custom
 router.post('/customer-login',customerLoginController.customerLogin);
 router.get('/customer-refresh',customerLoginController.handleRefreshToken);
 router.get('/customer-logout',customerLoginController.customerLogout);
-// router.post('/admin-forgot-password', customerLoginController.forgotPassword);
-// router.post('/admin-reset-password', customerLoginController.resetPassword);
+router.post('/customer-forgot', customerLoginController.forgotPassword);
+router.post('/customer-reset/:ids', customerLoginController.resetPassword);
 
 module.exports = router;
