@@ -82,58 +82,26 @@ const updateCustomerById = async (req, res) => {
         const [day, month, year] = dob.split('/');
         const formattedDOB = `${year}-${month}-${day}`;
         if (req.uploadedFiles) {
-            if (!Customer.profileImage) {
-                const CustomerUpdate = await prisma.Customer.update({
-                    where: { id: CustomerId },
-                    data: {
-                        fullName,
-                        dob: new Date(formattedDOB),// Convert the formatted date to a JavaScript Date object
-                        gender,
-                        phone,
-                        email,
-                        address,
-                        houseNo,
-                        street,
-                        landmark,
-                        pincode: parseInt(pincode),
-                        city,
-                        state,
-                        profileImage: {
-                            create: {
-                                fileName: req.uploadedFiles[0].name,
-                                url: req.uploadedFiles[0].url,
-                            }
-                        }
-                    }
-                })
-                res.status(200).json(CustomerUpdate);
-            } else {
-                const CustomerUpdate = await prisma.Customer.update({
-                    where: { id: CustomerId },
-                    data: {
-                        fullName,
-                        dob: new Date(formattedDOB),// Convert the formatted date to a JavaScript Date object
-                        gender,
-                        phone,
-                        email,
-                        address,
-                        houseNo,
-                        street,
-                        landmark,
-                        pincode: parseInt(pincode),
-                        city,
-                        state,
-                        profileImage: {
-                            update: {
-                                fileName: req.uploadedFiles[0].name,
-                                url: req.uploadedFiles[0].url,
-                                // Customer: { connect: { id: CustomerId } },
-                            }
-                        }
-                    }
-                })
-                res.status(200).json(CustomerUpdate);
-            }
+            const CustomerUpdate = await prisma.Customer.update({
+                where: { id: CustomerId },
+                data: {
+                    fullName,
+                    dob: new Date(formattedDOB),// Convert the formatted date to a JavaScript Date object
+                    gender,
+                    phone,
+                    email,
+                    address,
+                    houseNo,
+                    street,
+                    landmark,
+                    pincode: parseInt(pincode),
+                    city,
+                    state,
+                    fileName: req.uploadedFiles[0].name,
+                    url: req.uploadedFiles[0].url,
+                }
+            })
+            res.status(200).json(CustomerUpdate);
         } else {
             const CustomerUpdate = await prisma.Customer.update({
                 where: { id: CustomerId },
@@ -149,7 +117,7 @@ const updateCustomerById = async (req, res) => {
                     landmark,
                     pincode: parseInt(pincode),
                     city,
-                    state
+                    state,
                 }
             })
             res.status(200).json(CustomerUpdate);

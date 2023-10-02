@@ -23,7 +23,7 @@ const createNewCategories = async (req, res) => {
 
 const getCategoriesById = async (req, res) => {
     try {
-        const { ids } = req.parmas;
+        const { ids } = req.params;
         const [sellerId, categoriesId] = ids.split('-');
         const getCategorie = await prisma.Categories.findUnique({
             where: {
@@ -48,7 +48,7 @@ const getAllCategories = async (req, res) => {
 
 const getAllCategoriesBySeller = async (req, res) => {
     try {
-        const sellerId = parseInt(req.parmas.id);
+        const sellerId = parseInt(req.params.id);
         const getAllCategories = await prisma.Categories.findMany({
             where: { sellerId: sellerId, }
         })
@@ -60,7 +60,7 @@ const getAllCategoriesBySeller = async (req, res) => {
 
 const updateCategories = async (req, res) => {
     try {
-        const { ids } = req.parmas;
+        const { ids } = req.params;
         const [sellerId, categoriesId] = ids.split('-');
         const { catName } = req.body;
         if (!catName) return res.status(400).json({
@@ -84,7 +84,7 @@ const updateCategories = async (req, res) => {
 
 const deleteCategoriesBySeller = async (req, res) => {
     try {
-        const { ids } = req.parmas;
+        const { ids } = req.params;
         const [sellerId, categoriesId] = ids.split('-');
         const deleteCategorie = await prisma.Categories.delete({
             where: {
@@ -101,7 +101,7 @@ const deleteCategoriesBySeller = async (req, res) => {
 
 const deleteCategoriesById = async (req, res) => {
     try {
-        const categoriesId = parseInt(req.parmas.id);
+        const categoriesId = parseInt(req.params.id);
         const deleteCategorie = await prisma.Categories.delete({
             where: {
                 id: (categoriesId),

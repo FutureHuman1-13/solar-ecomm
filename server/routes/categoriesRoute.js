@@ -12,6 +12,6 @@ router.post("/create/:id",categoriesController.createNewCategories)
 router.put("/:ids",categoriesController.updateCategories)
 router.delete("/:ids",categoriesController.deleteAllCategories)
 router.delete("/:id",categoriesController.deleteCategoriesById)
-router.delete("",categoriesController.deleteCategoriesBySeller)
+router.delete("/delete/:ids",categoriesController.deleteCategoriesBySeller)
 
 module.exports = router;

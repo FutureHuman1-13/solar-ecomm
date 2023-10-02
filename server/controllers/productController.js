@@ -1,14 +1,16 @@
 const prisma = require('../db/prisma');
 
-const createNewProduct = async (req, res) => {
+const createNewProduct = async(req, res) => {
     try {
         // console.log(req.uploadedFiles)
         const { ids } = req.params;
         const [sellerId, categoriesId] = ids.split('-');
         const { productTitle, description, price, rating, quantity } = req.body;
-        if (!productTitle, !description, !price, !rating, !quantity) {
+        if (!productTitle || !description || !price || !rating || !quantity) {
             return res.status(400).json({ message: "All Fields are mendatory!" });
         }
+        console.log(req.uploadedFiles);
+        const imageUrl = req.uploadedFiles.map(image=>image.url);
         if (req.uploadedFiles) {
             const createProduct = await prisma.Product.create({
                 data: {
@@ -17,25 +19,15 @@ const createNewProduct = async (req, res) => {
                     price: parseInt(price),
                     rating: parseFloat(rating),
                     quantity: parseInt(quantity),
-                    picture: [req.uploadedFiles[0].url],
+                    picture:imageUrl,
                     categoriesId: parseInt(categoriesId),
                     sellerId: parseInt(sellerId),
-                    productImage: {
-                        create: {
-                            fileName: req.uploadedFiles[0].name,
-                            url: req.uploadedFiles[0].url,
-                        },
-                    },
                 },
-                include: {
-                    productImage: true
-                }
             })
             res.status(201).json(createProduct);
         } else {
             res.json({ message: "Please Insert Product Image!" })
         }
-
     } catch (err) {
         console.log(err);
         res.status(500).json({ err: "Error During Creation!" });
@@ -115,8 +107,9 @@ const updateProductBySeller = async (req, res) => {
                 sellerId: parseInt(sellerId),
             }
         })
-        if (!seller) return res.status(404).json({ message: "You are Not Authorize To Edit!" })
+        if (!seller) return res.status(404).json({ message: "You are Not Authorize To Edit!" });
         if (req.uploadedFiles) {
+            const imageUrl = req.uploadedFiles.map(image=>image.url);
             const updateProduct = await prisma.Product.update({
                 where: {
                     id: parseInt(productId),
@@ -128,17 +121,8 @@ const updateProductBySeller = async (req, res) => {
                     price: parseInt(price),
                     rating: parseFloat(rating),
                     quantity: parseInt(quantity),
-                    picture: [req.uploadedFiles[0].url],
-                    productImage: {
-                        update: {
-                            fileName: req.uploadedFiles[0].name,
-                            url: req.uploadedFiles[0].url,
-                        },
-                    },
+                    picture:imageUrl,
                 },
-                include: {
-                    productImage: true
-                }
             })
             res.status(201).json(updateProduct);
         } else {
@@ -150,13 +134,10 @@ const updateProductBySeller = async (req, res) => {
                 data: {
                     productTitle,
                     description,
-                    price: (price),
-                    rating: (rating),
-                    quantity: (quantity),
+                    price:parseInt(price),
+                    rating: parseFloat(rating),
+                    quantity: parseInt(quantity),
                 },
-                include: {
-                    productImage: true
-                }
             })
             res.status(201).json(updateProduct);
         }
@@ -175,7 +156,8 @@ const updateParticularProduct = async (req, res) => {
                 id: (productId)
             }
         })
-        if (!seller) return res.status(404).json({ message: "You are Not Authorize To Edit!" })
+        if (!seller) return res.status(404).json({ message: "You are Not Authorize To Edit!" });
+        const imageUrl = req.uploadedFiles.map(image=>image.url);
         if (req.uploadedFiles) {
             const updateProduct = await prisma.Product.update({
                 where: {
@@ -187,17 +169,8 @@ const updateParticularProduct = async (req, res) => {
                     price: parseInt(price),
                     rating: parseFloat(rating),
                     quantity: parseInt(quantity),
-                    picture: [req.uploadedFiles[0].url],
-                    productImage: {
-                        update: {
-                            fileName: req.uploadedFiles[0].name,
-                            url: req.uploadedFiles[0].url,
-                        },
-                    },
+                    picture: imageUrl,
                 },
-                include: {
-                    productImage: true
-                }
             })
             res.status(200).json(updateProduct);
         } else {
@@ -229,7 +202,7 @@ const deleteProductById = async (req, res) => {
         const productId = parseInt(req.params.id);
         const Product = await prisma.Product.findFirst({
             where: {
-                id:productId
+                id: productId
             }
         })
         if (!Product) return res.status(404).json({ message: "Product Not Found!" })
@@ -237,9 +210,6 @@ const deleteProductById = async (req, res) => {
             where: {
                 id: productId
             },
-            include:{
-                productImage:true
-            }
         })
         res.status(201).json(productDeleted);
     } catch (err) {

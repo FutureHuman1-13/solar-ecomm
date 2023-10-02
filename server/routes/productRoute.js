@@ -16,7 +16,7 @@ router.get("/get/:id",
     productController.getProductById)
 router.get("/seller/:id",
     verifyJwt,
-    checkPermissionRole.checkPermissions(["ViewProduct-BySeller"]),
+    checkPermissionRole.checkPermissions(["ViewProducts-BySeller"]),
     productController.getAllProductsBySeller)
 router.get("/seller/:ids",
     verifyJwt,

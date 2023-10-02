@@ -21,9 +21,9 @@ router.put("/activeInactive/:id",
 router.put("/update",
     verifyJwt,
     sellerController.updateSeller)
-router.delete("/delete",
+router.delete("/delete/:id",
     verifyJwt,
-    checkPermissionRole.checkPermissions(["View-Product"]),
+    checkPermissionRole.checkPermissions(["Delete-Seller"]),
     sellerController.deleteSeller)
 
 module.exports = router;
