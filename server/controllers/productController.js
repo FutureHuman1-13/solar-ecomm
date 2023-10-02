@@ -40,7 +40,7 @@ const getProductById = async (req, res) => {
         const getProduct = await prisma.Product.findUnique({
             where: { id: productId }
         })
-        res.status(201).json(getProduct);
+        res.status(200).json(getProduct);
     } catch (err) {
         console.log(err);
         res.status(500).json({ err: "Error retreving Detail!" });
@@ -50,7 +50,7 @@ const getProductById = async (req, res) => {
 const getAllProducts = async (req, res) => {
     try {
         const productList = await prisma.Product.findMany({})
-        res.status(201).json(productList)
+        res.status(200).json(productList)
     } catch (err) {
         console.log(err);
         res.status(500).json({ err: "Error retreving Details!" });
@@ -67,7 +67,7 @@ const getProductBySeller = async (req, res) => {
                 sellerId: parseInt(sellerId)
             }
         })
-        res.status(201).json(getProduct);
+        res.status(200).json(getProduct);
     }
     catch (err) {
         console.log(err);
@@ -89,7 +89,7 @@ const getAllProductsBySeller = async (req, res) => {
                 sellerId: sellerId
             }
         })
-        res.status(201).json(productList)
+        res.status(200).json(productList)
     } catch (err) {
         console.log(err);
         res.status(500).json({ err: "Error retreving Seller All Products Details!" });
@@ -124,7 +124,7 @@ const updateProductBySeller = async (req, res) => {
                     picture:imageUrl,
                 },
             })
-            res.status(201).json(updateProduct);
+            res.status(200).json(updateProduct);
         } else {
             const updateProduct = await prisma.Product.update({
                 where: {
@@ -139,7 +139,7 @@ const updateProductBySeller = async (req, res) => {
                     quantity: parseInt(quantity),
                 },
             })
-            res.status(201).json(updateProduct);
+            res.status(200).json(updateProduct);
         }
     } catch (err) {
         console.log(err);
@@ -211,7 +211,7 @@ const deleteProductById = async (req, res) => {
                 id: productId
             },
         })
-        res.status(201).json(productDeleted);
+        res.status(200).json(productDeleted);
     } catch (err) {
         console.log(err);
         res.status(500).json({ err: "Error Deleting Product!" });

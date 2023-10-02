@@ -31,18 +31,20 @@ const getCategoriesById = async (req, res) => {
                 sellerId: parseInt(sellerId)
             }
         })
-        res.status(201).json(getCategorie)
+        res.status(200).json(getCategorie)
     } catch (err) {
         console.log(err);
+        return res.status(500).json({Error:"Error fetching Detail!"})
     }
 }
 
 const getAllCategories = async (req, res) => {
     try {
         const getAllCategories = await prisma.Categories.findMany({})
-        res.status(201).json(getAllCategories);
+        res.status(200).json(getAllCategories);
     } catch (err) {
         console.log(err);
+        return res.status(500).json({Error:"Error fetching Details!"})
     }
 }
 
@@ -52,9 +54,11 @@ const getAllCategoriesBySeller = async (req, res) => {
         const getAllCategories = await prisma.Categories.findMany({
             where: { sellerId: sellerId, }
         })
-        res.status(201).json(getAllCategories);
+        res.status(200).json(getAllCategories);
     } catch (err) {
         console.log(err);
+        return res.status(500).json({Error:"Error fetching Details!"})
+        
     }
 }
 
@@ -76,9 +80,10 @@ const updateCategories = async (req, res) => {
                 catName,
             }
         })
-        res.status(201).json(createCategories);
+        res.status(200).json(createCategories);
     } catch (err) {
         console.log(err);
+        return res.status(500).json({Error:"Error Updating Details!"})
     }
 }
 
@@ -92,9 +97,10 @@ const deleteCategoriesBySeller = async (req, res) => {
                 sellerId: parseInt(sellerId),
             }
         })
-        res.status(201).json(deleteCategorie)
+        res.status(200).json(deleteCategorie)
     } catch (err) {
         console.log(err);
+        return res.status(500).json({Error:"Error Deleting Details!"})
     }
 
 }
@@ -107,19 +113,20 @@ const deleteCategoriesById = async (req, res) => {
                 id: (categoriesId),
             }
         })
-        res.status(201).json(deleteCategorie)
+        res.status(200).json(deleteCategorie)
     } catch (err) {
         console.log(err);
+        return res.status(500).json({Error:"Error Deleting Details!"})
     }
-
 }
 
 const deleteAllCategories = async (req, res) => {
     try {
         const deleteCategories = await prisma.Categories.deleteMany({})
-        res.status(201).json(deleteCategories)
+        res.status(200).json(deleteCategories)
     } catch (err) {
         console.log(err);
+        return res.status(500).json({Error:"Error Deleting Details!"})
     }
 }
 module.exports = { createNewCategories, updateCategories, deleteCategoriesById, deleteCategoriesBySeller, deleteAllCategories, getCategoriesById, getAllCategories, getAllCategoriesBySeller }

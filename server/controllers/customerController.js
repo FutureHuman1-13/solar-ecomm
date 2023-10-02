@@ -36,9 +36,10 @@ const registerCustomer = async (req, res) => {
                 roles: true
             }
         })
-        res.json(createCustomer);
+        res.status(201).json(createCustomer);
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
@@ -51,18 +52,20 @@ const getCustomerById = async (req, res) => {
             },
             include: { roles: true }
         })
-        res.json(Customer);
+        res.status(200).json(Customer);
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
 const getAllCustomers = async (req, res) => {
     try {
         const getUsers = await prisma.Customer.findMany({})
-        res.status(201).json(getUsers)
+        res.status(200).json(getUsers)
     } catch (err) {
         console.log(err);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
@@ -71,7 +74,6 @@ const updateCustomerById = async (req, res) => {
         const CustomerId = parseInt(req.params.id);
         const Customer = await prisma.Customer.findFirst({
             where: { id: CustomerId },
-            include: { profileImage: true },
         })
         if (!Customer) return res.status(400).json({ message: `Customer with ${CustomerId} not found!` });
         const { fullName, dob, gender, phone, address, email, houseNo, street, landmark, pincode, city, state } = req.body;
@@ -148,6 +150,7 @@ const updateCustomerRoleStatus = async (req, res) => {
         res.status(200).json(updateRole);
     } catch (err) {
         console.log(err);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
@@ -159,18 +162,20 @@ const deleteCustomerById = async (req, res) => {
                 id: CustomerId
             }
         });
-        res.json(deleteComplete);
+        res.status(200).json(deleteComplete);
     } catch (err) {
         console.log(err.message)
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
 const deleteAllCustomer = async (req, res) => {
     try {
         const deleteComplete = await prisma.Customer.deleteMany({});
-        res.json(deleteComplete);
+        res.status(200).json(deleteComplete);
     } catch (err) {
         console.log(err.message)
+        res.status(500).json({ Error: "Internal Server Error!" })    
     }
 }
 

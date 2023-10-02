@@ -36,9 +36,10 @@ const registerEmployee = async (req, res) => {
                 roles: true
             }
         })
-        res.json(createEmployee);
+        res.status(201).json(createEmployee);
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
@@ -51,18 +52,20 @@ const getEmployeeById = async (req, res) => {
             },
             include: { roles: true }
         })
-        res.json(Employee);
+        res.status(200).json(Employee);
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
 const getAllEmployees = async (req, res) => {
     try {
         const getUsers = await prisma.Employee.findMany({})
-        res.status(201).json(getUsers)
+        res.status(200).json(getUsers)
     } catch (err) {
         console.log(err);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
@@ -103,10 +106,11 @@ const updateEmployee = async (req, res) => {
                 }
             }
         })
-        res.json(employeeUpdate);
+        res.status(200).json(employeeUpdate);
 
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
@@ -124,7 +128,7 @@ const activeInactiveEmployee = async (req, res) => {
                     isActive: false
                 }
             })
-            res.status(201).json(employeeDeactivate);
+            res.status(200).json(employeeDeactivate);
         } else {
             const employeeActivate = await prisma.Employee.update({
                 where: { id: employeeId },
@@ -132,7 +136,7 @@ const activeInactiveEmployee = async (req, res) => {
                     isActive: true
                 }
             })
-            res.status(201).json(employeeActivate);
+            res.status(200).json(employeeActivate);
         }
     } catch (err) {
         console.log(err);
@@ -161,6 +165,7 @@ const updateEmployeeRoleStatus = async (req, res) => {
         res.status(200).json(updateRole);
     } catch (err) {
         console.log(err);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 
@@ -172,9 +177,10 @@ const deleteEmployeeById = async (req, res) => {
                 id: employeeId
             }
         });
-        res.json(deleteComplete);
+        res.status(200).json(deleteComplete);
     } catch (err) {
-        console.log(err.message)
+        console.log(err.message);
+        res.status(500).json({ Error: "Internal Server Error!" })
     }
 }
 

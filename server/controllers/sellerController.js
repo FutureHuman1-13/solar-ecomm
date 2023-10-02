@@ -36,9 +36,10 @@ const registerSeller = async (req, res) => {
                 roles:true
             }
         })
-        res.json(createSeller);
+        res.status(201).json(createSeller);
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ error: 'Error Creating Customer!' });
     }
 }
 
@@ -53,11 +54,10 @@ const getSellerById = async (req, res) => {
                 roles:true
             }
         })
-        res.json(Seller);
+        res.status(200).json(Seller);
     } catch (err) {
         console.log(err.message);
-        res.status(500).json({ err: 'Error retrieving Seller' });
-
+        res.status(500).json({ err: 'Error retrieving Seller' })
     }
 }
 
@@ -70,7 +70,7 @@ const getAllSellersLists = async (req, res) => {
             skip: skip,
             take: parseInt(perPage),
         });
-        res.json(Sellers);
+        res.status(200).json(Sellers);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error retrieving Sellers' });
@@ -91,7 +91,7 @@ const activateInactiveSellerStatus = async (req, res) => {
                     isActive: false
                 }
             })
-            res.status(201).json(sellerDeactivate);
+            res.status(200).json(sellerDeactivate);
         }else{
             const sellerActivate = await prisma.Seller.update({
                 where: { id: sellerId },
@@ -99,7 +99,7 @@ const activateInactiveSellerStatus = async (req, res) => {
                     isActive: true
                 }
             })
-            res.status(201).json(sellerActivate);
+            res.status(200).json(sellerActivate);
         } 
     } catch (err) {
         console.log(err);
@@ -146,7 +146,7 @@ const updateSeller = async (req, res) => {
                 }
             }
         })
-        res.json(SellerUpdate);
+        res.status(200).json(SellerUpdate);
     } catch (err) {
         console.log(err.message);
         res.status(500).json({ error: 'Error Updating Details!' });
@@ -161,7 +161,7 @@ const deleteSeller = async (req, res) => {
                 id: sellerId
             }
         });
-        res.json(deleteComplete);
+        res.status(200).json(deleteComplete);
     } catch (err) {
         console.log(err.message)
         res.status(500).json({ err: 'Error deleting Values!' });
