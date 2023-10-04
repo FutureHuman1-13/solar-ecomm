@@ -67,6 +67,7 @@ const getAllSellersLists = async (req, res) => {
         const skip = (page - 1) * perPage;// Calculate the number of items to skip based on the page number and items per page.
         // Retrieve Sellers with pagination
         const Sellers = await prisma.Seller.findMany({
+            where:{isActive:true},
             skip: skip,
             take: parseInt(perPage),
         });

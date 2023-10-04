@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 require('dotenv').config
-const prisma = require('../db/prisma');
+// const prisma = require('../db/prisma');
 
 const verifyJwt = async (req, res, next) => {
     try {

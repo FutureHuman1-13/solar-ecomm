@@ -61,7 +61,9 @@ const getEmployeeById = async (req, res) => {
 
 const getAllEmployees = async (req, res) => {
     try {
-        const getUsers = await prisma.Employee.findMany({})
+        const getUsers = await prisma.Employee.findMany({
+            where:{isActive:true}
+        })
         res.status(200).json(getUsers)
     } catch (err) {
         console.log(err);

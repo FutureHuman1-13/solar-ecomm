@@ -61,7 +61,9 @@ const getCustomerById = async (req, res) => {
 
 const getAllCustomers = async (req, res) => {
     try {
-        const getUsers = await prisma.Customer.findMany({})
+        const getUsers = await prisma.Customer.findMany({
+            where:{isActive:true}
+        })
         res.status(200).json(getUsers)
     } catch (err) {
         console.log(err);

@@ -11,7 +11,7 @@ const createRole = async (req, res) => {
         res.json(role);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message:"Role creation failed" });
+        res.status(500).json({ message: "Role creation failed" });
     }
 }
 
@@ -71,7 +71,7 @@ const updatePermission = async (req, res) => {
     }
 }
 
-const updateRole = async(req,res)=>{
+const updateRole = async (req, res) => {
     try {
         const roleId = parseInt(req.parmas.id);
         const { name } = req.body;
@@ -85,13 +85,16 @@ const updateRole = async(req,res)=>{
     } catch (err) {
         console.log(err);
         res.status(500).json({
-            err:"Error Updating Role!"        })
+            err: "Error Updating Role!"
+        })
     }
 }
 
 const listRoles = async (req, res) => {
     try {
-        const roles = await prisma.Role.findMany();
+        const roles = await prisma.Role.findMany({
+            where:{isActiveRole:true}
+        });
         res.json(roles);
     } catch (error) {
         console.error(error);
@@ -101,7 +104,9 @@ const listRoles = async (req, res) => {
 
 const listPermissions = async (req, res) => {
     try {
-        const permissions = await prisma.Permission.findMany();
+        const permissions = await prisma.Permission.findMany({
+            where:{isActivePermission:true}
+        });
         res.json(permissions);
     } catch (error) {
         console.error(error);
@@ -126,7 +131,7 @@ const assignPermissionToRole = async (req, res) => {
                     },
                 },
             },
-            include:{rolePermission:true}
+            include: { rolePermission: true }
         });
         res.json(role);
     } catch (error) {
@@ -136,5 +141,5 @@ const assignPermissionToRole = async (req, res) => {
 }
 
 module.exports = {
-    createRole, createPermission, assignPermissionToRole, listRoles, listPermissions, updatePermission,updateRole,
+    createRole, createPermission, assignPermissionToRole, listRoles, listPermissions, updatePermission, updateRole,
 };

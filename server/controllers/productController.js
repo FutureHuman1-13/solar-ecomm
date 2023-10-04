@@ -49,7 +49,9 @@ const getProductById = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
-        const productList = await prisma.Product.findMany({})
+        const productList = await prisma.Product.findMany({
+            where:{isActiveProduct:true}
+        })
         res.status(200).json(productList)
     } catch (err) {
         console.log(err);
@@ -80,7 +82,8 @@ const getAllProductsBySeller = async (req, res) => {
         const sellerId = parseInt(req.params.id);
         const seller = await prisma.Seller.findFirst({
             where: {
-                id: sellerId
+                id: sellerId,
+                isActiveProduct:true
             }
         })
         if (!seller) return res.status(404).json({ message: "Seller Not Found!" })

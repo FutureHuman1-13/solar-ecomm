@@ -60,7 +60,7 @@ const customerLogin = async (req, res) => {
             }
             return res.status(200).json({ accessToken, userDetails })
         } else {
-            return res.status(401).json({ message: "You are not Login!" })
+            return res.status(401).json({ message: "Your account has been deactivated!" })
         }
     } catch (err) {
         console.log(err);
