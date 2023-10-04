@@ -16,7 +16,7 @@ const customerLogin = async (req, res) => {
         if (!customerLogin) return res.sendStatus(401)//unauthorize.
         const match = await bcrypt.compare(password, customerLogin.password);
         if (!match) return res.status(403).json({ message: "Invalid email and password!" })//forbidden
-        if (customerLogin) {
+        if (customerLogin && customerLogin.isActive === true) {
             const roles = Object.values(customerLogin.roles)
             //create jwt
             const accessToken = jwt.sign({
@@ -59,6 +59,8 @@ const customerLogin = async (req, res) => {
                 userId: customerLogin.id
             }
             return res.status(200).json({ accessToken, userDetails })
+        } else {
+            return res.status(401).json({ message: "You are not Login!" })
         }
     } catch (err) {
         console.log(err);
@@ -67,76 +69,86 @@ const customerLogin = async (req, res) => {
 }
 
 const customerLogout = async (req, res) => {
-    const cookies = req.cookies;
-    if (!cookies?.jwt) return res.sendStatus(204)//no content
-    const refreshToken = cookies.jwt;
+    try {
+        const cookies = req.cookies;
+        if (!cookies?.jwt) return res.sendStatus(204)//no content
+        const refreshToken = cookies.jwt;
 
-    //Is refreshToken in database.
-    const foundCustomer = await prisma.Customer.findFirst({
-        where: { refreshToken: refreshToken }
-    })
-    if (foundCustomer) {
-        res.clearCookie('jwt', {
-            httpOnly: true,
-            sameSite: "None",
-            secure: true,
-        });
-        // res.status(200).json({ message: "Cookie Cleared!" });
-        const deleteRTFromDatabase = await prisma.Customer.update({
-            where: { id: foundCustomer.id },
-            data: { refreshToken: null }
+        //Is refreshToken in database.
+        const foundCustomer = await prisma.Customer.findFirst({
+            where: { refreshToken: refreshToken }
         })
-        res.status(200).json(deleteRTFromDatabase);
-    } else {
-        res.status(404).json({ message: "Customer Not Found!" })
+        if (foundCustomer) {
+            res.clearCookie('jwt', {
+                httpOnly: true,
+                sameSite: "None",
+                secure: true,
+            });
+            // res.status(200).json({ message: "Cookie Cleared!" });
+            const deleteRTFromDatabase = await prisma.Customer.update({
+                where: { id: foundCustomer.id },
+                data: { refreshToken: null }
+            })
+            res.status(200).json(deleteRTFromDatabase);
+        } else {
+            res.status(404).json({ message: "Customer Not Found!" })
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
 const handleRefreshToken = async (req, res) => {
-    const cookies = req.cookies;
-    if (!cookies?.jwt) return res.sendStatus(401);//unauthorize
-    const refreshToken = cookies.jwt;
-    const foundCustomer = await prisma.Customer.findFirst({
-        where: { refreshToken: refreshToken },
-        include: { roles: { include: { permissions: true } } }
-    })
-    if (!foundCustomer) return res.sendStatus(403)//forbidden
-    jwt.verify(
-        refreshToken,
-        process.env.REFRESH_TOKEN,
-        async(err, decoded) => {
-            if (err || foundCustomer.email !== decoded.email) return res.sendStatus(403)//forbidden
-            const roles = Object.values(foundCustomer.roles);
-            const accessToken = jwt.sign(
-                {
+    try {
+        const cookies = req.cookies;
+        if (!cookies?.jwt) return res.sendStatus(401);//unauthorize
+        const refreshToken = cookies.jwt;
+        const foundCustomer = await prisma.Customer.findFirst({
+            where: { refreshToken: refreshToken },
+            include: { roles: { include: { permissions: true } } }
+        })
+        if (!foundCustomer) return res.sendStatus(403)//forbidden
+        jwt.verify(
+            refreshToken,
+            process.env.REFRESH_TOKEN,
+            async (err, decoded) => {
+                if (err || foundCustomer.email !== decoded.email) return res.sendStatus(403)//forbidden
+                const roles = Object.values(foundCustomer.roles);
+                const accessToken = jwt.sign(
+                    {
+                        "id": foundCustomer.id,
+                        "email": foundCustomer.email,
+                        "roles": roles
+                    },
+                    process.env.ACCESS_TOKEN,
+                    { expiresIn: "1m" }
+                )
+                const refreshNewToken = jwt.sign({
                     "id": foundCustomer.id,
                     "email": foundCustomer.email,
                     "roles": roles
-                },
-                process.env.ACCESS_TOKEN,
-                { expiresIn: "1m" }
-            )
-            const refreshNewToken = jwt.sign({
-                "id": foundCustomer.id,
-                "email": foundCustomer.email,
-                "roles": roles
-            }, process.env.REFRESH_TOKEN,
-                {
-                    expiresIn: '7d'
+                }, process.env.REFRESH_TOKEN,
+                    {
+                        expiresIn: '7d'
+                    })
+                const updateCustomer = await prisma.Customer.update({
+                    where: { id: foundCustomer.id },
+                    data: { refreshToken: refreshNewToken }
                 })
-            const updateCustomer = await prisma.Customer.update({
-                where: { id: foundCustomer.id },
-                data: { refreshToken: refreshNewToken }
-            })
-            res.cookie('jwt', refreshNewToken, {
-                httpOnly: true,
-                sameSite: "None",
-                // secure: true,
-                maxAge: 7 * 24 * 60 * 60 * 1000//7 days
-            })
-            res.status(200).json({ accessToken, result: foundCustomer })
-        }
-    );
+                res.cookie('jwt', refreshNewToken, {
+                    httpOnly: true,
+                    sameSite: "None",
+                    // secure: true,
+                    maxAge: 7 * 24 * 60 * 60 * 1000//7 days
+                })
+                res.status(200).json({ accessToken, result: foundCustomer })
+            }
+        );
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 }
 
 const forgotPassword = async (req, res) => {
@@ -144,10 +156,10 @@ const forgotPassword = async (req, res) => {
         const { email } = req.body;
         if (!email) return res.status(404).json("Please enter Correct Email!");
         const foundCustomer = await prisma.Customer.findFirst({
-            where:{email:email}
+            where: { email: email }
         })
         const resetToken = crypto.randomBytes(20).toString('hex');
-        const resetTokenExpiry = new Date(Date.now() +  60 * 1000);//token expiry in 1mn.
+        const resetTokenExpiry = new Date(Date.now() + 60 * 1000);//token expiry in 1mn.
         const resetLink = `https://example.com/reset-password?token=${resetToken}-${foundCustomer.id}`;
         // const emailTemplatePath = path.join(__dirname, '..', 'views', 'password_reset_user.ejs');
         // const emailTemplate = fs.readFileSync(emailTemplatePath, 'utf-8');
@@ -194,12 +206,12 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
     try {
-        const {ids} = req.params;
-        const [resetToken,customerId] = ids.split('-') 
+        const { ids } = req.params;
+        const [resetToken, customerId] = ids.split('-')
         const { newPassword, confirmPassword } = req.body;
         const Customer = await prisma.Customer.findFirst({
             where: {
-                id:parseInt(customerId),
+                id: parseInt(customerId),
                 resetToken: resetToken,
                 resetTokenExpiry: {
                     gte: new Date(),
@@ -226,11 +238,11 @@ const resetPassword = async (req, res) => {
             },
         });
 
-        res.status(200).json({ updatedUser,message: 'Password reset successfully' });
+        res.status(200).json({ updatedUser, message: 'Password reset successfully' });
     } catch (err) {
         console.error('Error:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 
 }
-module.exports = { customerLogin, customerLogout, handleRefreshToken,resetPassword,forgotPassword };
+module.exports = { customerLogin, customerLogout, handleRefreshToken, resetPassword, forgotPassword };

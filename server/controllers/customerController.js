@@ -154,6 +154,36 @@ const updateCustomerRoleStatus = async (req, res) => {
     }
 }
 
+const activeInactiveCustomer = async(req,res)=>{
+    try{
+        const customerId = parseInt(req.params.id);
+        const customer = await prisma.Customer.findFirst({
+            where: { id: customerId }
+        })
+        if (!customer) return res.status(404).json({ message: "customer not found!" })
+        if (customer.isActive === true) {
+            const customerDeactivate = await prisma.Customer.update({
+                where: { id: customerId },
+                data: {
+                    isActive: false
+                }
+            })
+            res.status(200).json(customerDeactivate);
+        } else {
+            const customerActivate = await prisma.Customer.update({
+                where: { id: customerId },
+                data: {
+                    isActive: true
+                }
+            })
+            res.status(200).json(customerActivate);
+        }
+    }catch(err){
+        console.log(err);
+        res.status(500).json({ Error: "Internal Server Error!" })
+    }
+}
+
 const deleteCustomerById = async (req, res) => {
     try {
         const CustomerId = parseInt(req.params.id);
@@ -179,4 +209,4 @@ const deleteAllCustomer = async (req, res) => {
     }
 }
 
-module.exports = { registerCustomer, getCustomerById, updateCustomerById, deleteCustomerById, getAllCustomers, deleteAllCustomer, updateCustomerRoleStatus };
+module.exports = { registerCustomer, getCustomerById, updateCustomerById, deleteCustomerById, getAllCustomers, deleteAllCustomer, updateCustomerRoleStatus,activeInactiveCustomer };

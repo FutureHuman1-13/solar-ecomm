@@ -14,6 +14,7 @@ fileupload.upload.any(),
 fileupload.uploadImagesToFirebase,
 customerController.updateCustomerById)
 router.put("/update-role/:ids",customerController.updateCustomerRoleStatus)
+router.put("/activeInactive/:id",customerController.activeInactiveCustomer)
 router.delete("/delete/:id",customerController.deleteCustomerById)
 router.delete("/delete",customerController.deleteAllCustomer)
 
