@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../../db/prisma');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-require('dotenv').config();
+// require('dotenv').config();
 
 const customerLogin = async (req, res) => {
     try {
@@ -15,7 +15,7 @@ const customerLogin = async (req, res) => {
         });
         if (!customerLogin) return res.sendStatus(401)//unauthorize.
         const match = await bcrypt.compare(password, customerLogin.password);
-        if (!match) return res.status(403).json({ message: "Invalid email and password!" })//forbidden
+        if (!match) return res.status(403).json({ message: "Invalid email or password!" })//forbidden
         if (customerLogin && customerLogin.isActive === true) {
             const roles = Object.values(customerLogin.roles)
             //create jwt
@@ -73,7 +73,6 @@ const customerLogout = async (req, res) => {
         const cookies = req.cookies;
         if (!cookies?.jwt) return res.sendStatus(204)//no content
         const refreshToken = cookies.jwt;
-
         //Is refreshToken in database.
         const foundCustomer = await prisma.Customer.findFirst({
             where: { refreshToken: refreshToken }
@@ -84,7 +83,7 @@ const customerLogout = async (req, res) => {
                 sameSite: "None",
                 secure: true,
             });
-            // res.status(200).json({ message: "Cookie Cleared!" });
+            // res.status(204).json({ message: "Cookie Cleared!" });
             const deleteRTFromDatabase = await prisma.Customer.update({
                 where: { id: foundCustomer.id },
                 data: { refreshToken: null }
@@ -176,7 +175,7 @@ const forgotPassword = async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
-                user: process.env.EMAIL_ADMIN,
+                user: process.env.EMAIL_ADMIN, 
                 pass: process.env.EMAIL_ADMIN_PASSWORD,
             },
         });
@@ -245,4 +244,5 @@ const resetPassword = async (req, res) => {
     }
 
 }
+
 module.exports = { customerLogin, customerLogout, handleRefreshToken, resetPassword, forgotPassword };

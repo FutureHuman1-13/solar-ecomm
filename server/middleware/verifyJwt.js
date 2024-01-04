@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken')
-require('dotenv').config
-// const prisma = require('../db/prisma');
+// require('dotenv').config
+const prisma = require('../db/prisma');
 
 const verifyJwt = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization || req.headers.Authorization;
-        if (!authHeader?.startsWith('Bearer ')) return res.sendStatus(401);//unauthorize
+        if (!authHeader?.startsWith('Bearer ')) return res.sendStatus(403);//forbidden
         console.log(authHeader);//bearer token
         const token = authHeader.split(' ')[1];
         jwt.verify(
