@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const PORT = process.env.PORT || 6000;
 require('dotenv').config();
-// const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 // const multer = require('multer')
 const corsOption = require('./config/corsOption');
 // require('express-async-errors');
@@ -12,7 +12,7 @@ const corsOption = require('./config/corsOption');
 app.use(cors(corsOption));
 app.use(express.json());
 app.use(cookieParser());
-// app.use(bodyParser.json())
+app.use(bodyParser.json())
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
